@@ -10,7 +10,7 @@ export type CarState = {
   id: string;
   name: string;
   brand: Brand;
-  category: { id: string; name: string; price: number };
+  category: { id: string; categoryName: string; price: number };
   price: number;
   image: string;
   description: string;

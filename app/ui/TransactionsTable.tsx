@@ -61,7 +61,9 @@ const TransactionsTable = async ({
                 </span>
               </td>
               <td className="p-4 border-b">
-                <Link href={`/dashboard/bookings/${transaction.id}/display`}>
+                <Link
+                  href={`/dashboard/transactions/${transaction.id}/display`}
+                >
                   <button className="bg-blue-500 text-white px-3 py-1 rounded-lg">
                     Details
                   </button>

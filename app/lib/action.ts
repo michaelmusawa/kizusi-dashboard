@@ -762,8 +762,8 @@ export async function fetchFilteredTransactions(
       FROM "Transaction" t
       WHERE 
         t.reference ILIKE $1 OR
-        t.amount ILIKE $1
-      ORDER BY b."createdAt" ASC
+        CAST(t.amount AS TEXT) ILIKE $1
+      ORDER BY t."createdAt" ASC
       LIMIT $2 OFFSET $3
     `,
       [`%${query}%`, ITEMS_PER_PAGE, offset]
@@ -818,7 +818,7 @@ export async function getTransactionsById(
       return null;
     }
   } catch (error) {
-    console.error("Error fetching category by ID:", error);
+    console.error("Error fetching transaction by ID:", error);
     throw error; // Optionally rethrow the error for further handling
   }
 }
