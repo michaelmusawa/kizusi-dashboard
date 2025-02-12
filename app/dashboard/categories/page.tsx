@@ -25,7 +25,7 @@ const Page = async (props: {
       <div className="bg-white shadow-md rounded-lg p-4">
         {success && <SuccessMessage message="Category edited successfully." />}
 
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6 gap-4">
           <Link href={"/dashboard/categories/create"} className="block">
             <button className="border border-gray-300 shadow-lg p-2">
               Add
@@ -33,7 +33,6 @@ const Page = async (props: {
           </Link>
 
           <Search placeholder="Search category name..." />
-          <button className="px-4 py-2 ml-4 rounded-lg">Filter</button>
         </div>
 
         <Suspense key={query + currentPage} fallback={<CarDisplaySkeleton />}>

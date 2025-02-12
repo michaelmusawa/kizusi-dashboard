@@ -25,14 +25,13 @@ const Page = async (props: {
         <div aria-live="polite" aria-atomic="true">
           {success && <SuccessMessage message="Car updated successfully." />}
         </div>
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6 gap-4">
           <Link href={"/dashboard/cars/create"}>
             <button className="bg-blue-500 rounded-lg shadow-lg p-2 text-gray-50">
               Add
             </button>
           </Link>
           <Search placeholder="Search car name, category or brand..." />
-          <button className="px-4 py-2 ml-4 rounded-lg">Filter</button>
         </div>
 
         <Suspense key={query + currentPage} fallback={<CarDisplaySkeleton />}>
