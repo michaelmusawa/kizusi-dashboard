@@ -68,7 +68,12 @@ const CarFormSchema = z.object({
   price: z.coerce.number(),
   image: z.string(),
   description: z.string(),
-  addon: z.array(z.string()),
+  addon: z.array(
+    z.object({
+      name: z.string(),
+      value: z.coerce.number(),
+    })
+  ),
   feature: z.array(
     z.object({
       name: z.string(),
@@ -88,7 +93,10 @@ export async function createCar(
     image: formData.get("image"),
     description: formData.get("description"),
     price: formData.get("price"),
-    addon: formData.getAll("addon"),
+    addon: formData.getAll("addon").map((addon, index) => ({
+      name: addon,
+      value: formData.getAll("value")[index],
+    })),
     feature: formData.getAll("feature").map((feature, index) => ({
       name: feature,
       value: formData.getAll("value")[index],
@@ -151,9 +159,11 @@ export async function createCar(
 
     // Insert addons if provided
     if (addon?.length) {
-      const addonValues = addon.map((a) => `(${carId}, '${a}')`).join(",");
+      const addonValues = addon
+        .map((a) => `(${carId}, '${a.name}', '${a.value}')`)
+        .join(",");
       await client.query(
-        `INSERT INTO "Addon" ("carId", name) 
+        `INSERT INTO "Addon" ("carId", "addonName", "addonValue") 
            VALUES ${addonValues}`
       );
     }
@@ -192,7 +202,7 @@ export async function getCarById(id: number): Promise<CarState> {
         ) AS features,
         COALESCE(
           JSONB_AGG(
-            DISTINCT JSONB_BUILD_OBJECT('addonId', a.id, 'addonName', a.name)
+            DISTINCT JSONB_BUILD_OBJECT('addonId', a.id, 'addonName', a."addonName", 'addonValue', a."addonValue")
           ) FILTER (WHERE a.id IS NOT NULL), '[]'::jsonb
         ) AS addons
       FROM "Car" car
@@ -239,7 +249,7 @@ export async function fetchFilteredCars(
         ) AS features,
         COALESCE(
           JSONB_AGG(
-            DISTINCT JSONB_BUILD_OBJECT('addonId', a.id, 'addonName', a.name)
+            DISTINCT JSONB_BUILD_OBJECT('addonId', a.id, 'addonName', a."addonName", 'addonValue', a."addonValue")
           ) FILTER (WHERE a.id IS NOT NULL), '[]'::jsonb
         ) AS addons
       FROM "Car" car
@@ -303,7 +313,10 @@ export async function updateCar(
     image: formData.get("image"),
     description: formData.get("description"),
     price: formData.get("price"),
-    addon: formData.getAll("addon"),
+    addon: formData.getAll("addon").map((addon, index) => ({
+      name: addon,
+      value: formData.getAll("value")[index],
+    })),
     feature: formData.getAll("feature").map((feature, index) => ({
       name: feature,
       value: formData.getAll("value")[index],
@@ -390,12 +403,11 @@ export async function updateCar(
     // Insert new addons
     for (const a of addon) {
       const insertAddonQuery = `
-          INSERT INTO "Addon" ("carId", name)
-          VALUES ($1, $2)
+          INSERT INTO "Addon" ("carId", "addonName", "addonValue")
+          VALUES ($1, $2, $3)
         `;
-      await pool.query(insertAddonQuery, [id, a]);
+      await pool.query(insertAddonQuery, [id, a.name, a.value]);
     }
-
     // Commit the transaction
     await pool.query("COMMIT");
   } catch (error) {

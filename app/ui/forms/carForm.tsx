@@ -15,9 +15,16 @@ const CarForm: React.FC<{
         }))
       : []
   );
-  const [addons, setAddons] = useState<string[]>(
-    car?.addons ? car.addons.map((a) => a.addonName) : []
+
+  const [addons, setAddons] = useState<{ name: string; value: number }[]>(
+    car?.addons
+      ? car.addons.map((f) => ({
+          name: f.addonName,
+          value: f.addonValue,
+        }))
+      : []
   );
+
   const [category, setCategory] = useState<string>(car?.category.name ?? "");
   const [brand, setBrand] = useState<string>(car?.brand.brandName ?? "");
 
@@ -41,10 +48,24 @@ const CarForm: React.FC<{
     setFeatures([...features, { name: "", value: "" }]);
   };
 
+  const handleAddAddon = () => {
+    setAddons([...addons, { name: "", value: 0 }]);
+  };
+
   const handleFeatureChange = (index: number, field: string, value: string) => {
     const updatedFeatures = [...features];
     updatedFeatures[index] = { ...updatedFeatures[index], [field]: value };
     setFeatures(updatedFeatures);
+  };
+
+  const handleAddonChange = (
+    index: number,
+    field: string,
+    value: string | number
+  ) => {
+    const updatedAddons = [...addons];
+    updatedAddons[index] = { ...updatedAddons[index], [field]: value };
+    setAddons(updatedAddons);
   };
 
   const handleRemoveFeature = (index: number) => {
@@ -52,14 +73,9 @@ const CarForm: React.FC<{
     setFeatures(updatedFeatures);
   };
 
-  const handleAddAddon = (addon: string) => {
-    if (!addons.includes(addon)) {
-      setAddons([...addons, addon]);
-    }
-  };
-
-  const handleRemoveAddon = (addon: string) => {
-    setAddons(addons.filter((item) => item !== addon));
+  const handleRemoveAddon = (index: number) => {
+    const updatedAddons = addons.filter((_, i) => i !== index);
+    setAddons(updatedAddons);
   };
 
   console.log("beginning category", car?.brand.brandName);
@@ -165,7 +181,62 @@ const CarForm: React.FC<{
         </button>
       </div>
 
+      {/* Add addons */}
+
       <div className="mb-4">
+        <label className="block font-medium mb-2">Addons</label>
+
+        {addons.map((addon, index) => (
+          <div key={index} className="flex space-x-4 mb-2">
+            <select
+              name="addon"
+              className="w-1/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={addon.name}
+              onChange={(e) => handleAddonChange(index, "name", e.target.value)}
+              required
+            >
+              <option value="">Select an Addon</option>
+              <option value="Bluetooth">Bluetooth</option>
+              <option value="WiFi">WiFi</option>
+              <option value="Water">Water</option>
+              <option value="Charger">Charger</option>
+              <option value="GPS">GPS</option>
+              <option value="Baby Seat">Baby Seat</option>
+              <option value="Roof Rack">Roof Rack</option>
+            </select>
+
+            <input
+              type="number"
+              name="value"
+              placeholder="Value"
+              className="w-2/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={addon.value}
+              onChange={(e) =>
+                handleAddonChange(index, "value", +e.target.value)
+              }
+              required
+            />
+            <button
+              type="button"
+              onClick={() => handleRemoveAddon(index)}
+              className="text-red-500"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={handleAddAddon}
+          className="text-blue-500"
+        >
+          Add Addon
+        </button>
+      </div>
+
+      {/* End of addons  */}
+
+      {/* <div className="mb-4">
         <label className="block font-medium mb-2">Addons</label>
         <div className="flex space-x-4 mb-2">
           <select
@@ -204,7 +275,7 @@ const CarForm: React.FC<{
             </span>
           ))}
         </div>
-      </div>
+      </div> */}
 
       <div className="mb-4">
         <label className="block font-medium mb-2">Description</label>

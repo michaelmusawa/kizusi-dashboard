@@ -14,6 +14,7 @@ model User {
   clerkId String?
   password  String?
   phone     String?  @unique
+  image String?
   bookings  Booking[]
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
@@ -27,13 +28,17 @@ model Booking {
   car           Car           @relation(fields: [carId], references: [id], onDelete: Cascade)
   bookingDate     DateTime
   amount      Decimal  @db.Decimal(10, 2)
+  departureLatitude Decimal @db.Decimal(10,2)
+  departureLongitude Decimal @db.Decimal(10,2)
+  destinationLatitude Decimal? @db.Decimal(10,2)
+  destinationLongitude Decimal? @db.Decimal(10,2)
   departure     String
-  destination   String
+  destination   String?
   paymentStatus        String        @default("PENDING") // "FAILED", "CONFIRMED"
   bookType String
   paymentType String 
   bookingStatus String @default("PENDING") // ("PROCEEDED","CANCELLED","NO SHOW")
-  transaction   Transaction?
+  transaction   Transaction[]
   transactionId String?       @unique // Links to Transaction if paid
   addons        BookingAddon[]
   createdAt     DateTime      @default(now())
@@ -52,7 +57,7 @@ model BookingAddon {
 model Transaction {
   id          Int     @id @default(autoincrement())
   booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  bookingId   String   @unique
+  bookingId   String   
   amount      Decimal  @db.Decimal(10, 2)
   status      String   @default("PENDING") // PENDING, SUCCESS, FAILED
   reference   String   @unique
@@ -118,9 +123,10 @@ model Addon {
   id          Int             @id @default(autoincrement())
   car         Car             @relation(fields: [carId], references: [id], onDelete: Cascade)
   carId       Int
-  name        String
+  addonName        String
+  addonValue        String
   bookings    BookingAddon[]  // 🔥 Add this to fix the error
 
-  @@unique([carId, name]) // Prevents duplicate addons for a car
+  @@unique([carId, addonName]) // Prevents duplicate addons for a car
 }
 

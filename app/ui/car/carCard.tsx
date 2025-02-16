@@ -21,9 +21,7 @@ const CarCard: FC<CarState> = ({
         {brand.brandName}
       </div>
       <Image
-        src={
-          "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        }
+        src={image}
         alt={`${name} ${brand}`}
         width={2070}
         height={1380}
@@ -79,9 +77,7 @@ const CategoryCard: FC<CategoryState> = ({
   return (
     <div className="relative rounded-2xl shadow-lg">
       <Image
-        src={
-          "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        }
+        src={image}
         alt={`${name}`}
         width={2070}
         height={1380}
