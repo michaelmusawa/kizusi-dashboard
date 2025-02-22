@@ -119,6 +119,7 @@ model Feature {
   @@unique([carId, featureName]) // Prevents duplicate features for a car
 }
 
+
 model Addon {
   id          Int             @id @default(autoincrement())
   car         Car             @relation(fields: [carId], references: [id], onDelete: Cascade)

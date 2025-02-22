@@ -1,17 +1,23 @@
 import React from "react";
 import { fetchFilteredTransactions } from "../lib/action";
-import Link from "next/link";
 
 const TransactionsTable = async ({
   query,
+  startDate,
+  endDate,
   currentPage,
 }: {
   query: string;
+  startDate: string;
+  endDate: string;
   currentPage: number;
 }) => {
-  const transactions = await fetchFilteredTransactions(query, currentPage);
-
-  console.log(transactions);
+  const transactions = await fetchFilteredTransactions(
+    query,
+    startDate,
+    endDate,
+    currentPage
+  );
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -37,7 +43,6 @@ const TransactionsTable = async ({
             <th className="p-4 border-b font-medium">Booking ID</th>
             <th className="p-4 border-b font-medium">Date & Time</th>
             <th className="p-4 border-b font-medium">Status</th>
-            <th className="p-4 border-b font-medium">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -47,7 +52,7 @@ const TransactionsTable = async ({
               <td className="p-4 border-b">{transaction.id}</td>
               <td className="p-4 border-b">{transaction.reference}</td>
               <td className="p-4 border-b">{transaction.amount}</td>
-              <td className="p-4 border-b">{transaction.bookId}</td>
+              <td className="p-4 border-b">{transaction.bookingId}</td>
               <td className="p-4 border-b">
                 {transaction.createdAt.toString()}
               </td>
@@ -59,15 +64,6 @@ const TransactionsTable = async ({
                 >
                   {transaction.status}
                 </span>
-              </td>
-              <td className="p-4 border-b">
-                <Link
-                  href={`/dashboard/transactions/${transaction.id}/display`}
-                >
-                  <button className="bg-blue-500 text-white px-3 py-1 rounded-lg">
-                    Details
-                  </button>
-                </Link>
               </td>
             </tr>
           ))}

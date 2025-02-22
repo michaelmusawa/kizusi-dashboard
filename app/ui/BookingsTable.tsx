@@ -4,14 +4,21 @@ import Link from "next/link";
 
 const BookingsTable = async ({
   query,
+  startDate,
+  endDate,
   currentPage,
 }: {
   query: string;
+  startDate: string;
+  endDate: string;
   currentPage: number;
 }) => {
-  const bookings = await fetchFilteredBookings(query, currentPage);
-
-  console.log(bookings);
+  const bookings = await fetchFilteredBookings(
+    query,
+    startDate,
+    endDate,
+    currentPage
+  );
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -55,7 +62,7 @@ const BookingsTable = async ({
               <td className="p-4 border-b">{booking.bookType}</td>
               <td className="p-4 border-b">{booking.departure}</td>
               <td className="p-4 border-b">{booking.destination}</td>
-              <td className="p-4 border-b">{booking.createdAt.toString()}</td>
+              <td className="p-4 border-b">{booking.bookingDate.toString()}</td>
               <td className="p-4 border-b">{booking.amount}</td>
               <td className="p-4 border-b">{booking.paymentStatus}</td>
               <td className="p-4 border-b">{booking.paymentType}</td>

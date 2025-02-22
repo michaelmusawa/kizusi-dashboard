@@ -4,30 +4,26 @@ import HomeIcon from "../icons/HomeIcon";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import Truck from "../icons/truck";
 import RecordIcon from "../icons/recordIcon";
-import EllipsisIcon from "../icons/ellipsisIcon";
 import NotificationIcon from "../icons/Notification";
 import MoneyIcon from "../icons/moneyIcon";
-import TransactionIcon from "../icons/transactionIcon";
+import Category from "../icons/Category";
+import Car from "../icons/Car";
 
-// Map of links to display in the side navigation.
-// Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: "Home", href: "/dashboard", icon: HomeIcon },
   {
     name: "Cars",
     href: "/dashboard/cars",
-    icon: Truck,
+    icon: Car,
   },
+  { name: "Categories", href: "/dashboard/categories", icon: Category },
   { name: "Bookings", href: "/dashboard/bookings", icon: RecordIcon },
-  { name: "Categories", href: "/dashboard/categories", icon: EllipsisIcon },
   {
     name: "Transactions",
     href: "/dashboard/transactions",
-    icon: TransactionIcon,
+    icon: MoneyIcon,
   },
-  { name: "Payments", href: "/dashboard/payments", icon: MoneyIcon },
   {
     name: "Notifications",
     href: "/dashboard/notifications",

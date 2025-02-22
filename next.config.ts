@@ -9,6 +9,18 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "**", // Use "**" to allow all image paths under the hostname
       },
+      {
+        protocol: "https",
+        hostname: "maps.geoapify.com",
+        port: "",
+        pathname: "**", // Use "**" to allow all image paths under the hostname
+      },
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+        port: "",
+        pathname: "**", // Use "**" to allow all image paths under the hostname
+      },
     ],
   },
 };

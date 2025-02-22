@@ -4,6 +4,8 @@ import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 import {
+  BookingActionState,
+  BookingData,
   BookingState,
   CarActionState,
   CarState,
@@ -15,6 +17,7 @@ import {
 import pool from "./db";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { formatCurrency } from "./utils";
 
 export async function authenticate(_currentState: unknown, formData: FormData) {
   try {
@@ -756,14 +759,15 @@ export async function deleteCategory(id: string): Promise<boolean> {
 
 export async function fetchFilteredTransactions(
   query: string,
+  startDate: string,
+  endDate: string,
   currentPage: number
 ): Promise<TransactionState[]> {
   const ITEMS_PER_PAGE = 10;
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const result = await pool.query(
-      `
+    let queryString = `
       SELECT 
         t.id, 
         t.reference, 
@@ -773,13 +777,34 @@ export async function fetchFilteredTransactions(
         t."createdAt"
       FROM "Transaction" t
       WHERE 
-        t.reference ILIKE $1 OR
-        CAST(t.amount AS TEXT) ILIKE $1
+        (t.reference ILIKE $1 OR
+        t."bookingId" ILIKE $1 OR
+        CAST(t.amount AS TEXT) ILIKE $1)`;
+
+    // If both startDate and endDate are provided, add date range filter
+    const queryParams = [`%${query}%`];
+
+    if (startDate && endDate) {
+      queryString += ` AND t."createdAt" BETWEEN $2 AND $3`;
+      queryParams.push(startDate, endDate);
+    } else if (startDate) {
+      queryString += ` AND t."createdAt" >= $2`;
+      queryParams.push(startDate);
+    } else if (endDate) {
+      queryString += ` AND t."createdAt" <= $2`;
+      queryParams.push(endDate);
+    }
+    // Add pagination and order
+    queryString += `
       ORDER BY t."createdAt" ASC
-      LIMIT $2 OFFSET $3
-    `,
-      [`%${query}%`, ITEMS_PER_PAGE, offset]
-    );
+      LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+
+    // Add pagination params to queryParams array
+    queryParams.push(ITEMS_PER_PAGE, offset);
+
+    // Execute the query
+    const result = await pool.query(queryString, queryParams);
+
     return result.rows;
   } catch (error) {
     console.error("Error fetching filtered transactions:", error);
@@ -837,14 +862,16 @@ export async function getTransactionsById(
 
 export async function fetchFilteredBookings(
   query: string,
+  startDate: string,
+  endDate: string,
   currentPage: number
 ): Promise<BookingState[]> {
   const ITEMS_PER_PAGE = 10;
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const result = await pool.query(
-      `
+    // Create the base SQL query with the date filtering conditions
+    let queryString = `
       SELECT 
         b.id, 
         u.name AS "userName",
@@ -854,7 +881,11 @@ export async function fetchFilteredBookings(
         b."bookingDate",
         b.amount, 
         b.departure, 
+        b."departureLatitude",
+        b."departureLongitude",
         b.destination, 
+        b."destinationLatitude",
+        b."destinationLongitude",
         b."paymentStatus",
         b."bookingStatus",
         b."createdAt"
@@ -862,13 +893,33 @@ export async function fetchFilteredBookings(
       LEFT JOIN "User" u ON b."userId" = u.id
       LEFT JOIN "Car" c ON b."carId" = c.id
       WHERE 
-        u.name ILIKE $1 OR
-        c.name ILIKE $1
+        (u.name ILIKE $1 OR c.name ILIKE $1)`;
+
+    // If both startDate and endDate are provided, add date range filter
+    const queryParams = [`%${query}%`];
+
+    if (startDate && endDate) {
+      queryString += ` AND b."bookingDate" BETWEEN $2 AND $3`;
+      queryParams.push(startDate, endDate);
+    } else if (startDate) {
+      queryString += ` AND b."bookingDate" >= $2`;
+      queryParams.push(startDate);
+    } else if (endDate) {
+      queryString += ` AND b."bookingDate" <= $2`;
+      queryParams.push(endDate);
+    }
+
+    // Add pagination and order
+    queryString += `
       ORDER BY b."createdAt" ASC
-      LIMIT $2 OFFSET $3
-    `,
-      [`%${query}%`, ITEMS_PER_PAGE, offset]
-    );
+      LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+
+    // Add pagination params to queryParams array
+    queryParams.push(ITEMS_PER_PAGE, offset);
+
+    // Execute the query
+    const result = await pool.query(queryString, queryParams);
+
     return result.rows;
   } catch (error) {
     console.error("Error fetching filtered bookings:", error);
@@ -902,35 +953,303 @@ export async function getBookingById(
     const result = await pool.query(
       `
       SELECT 
-        b.id, 
+        b.*,  -- Select all columns from Booking table
         u.name AS "userName",
         u.phone,
-        c.id,
+        c.id AS "carId",
         c.name AS "carName",
-        b."bookingDate",
-        b.amount, 
-        b.departure, 
-        b.destination, 
-        b."paymentStatus",
-        b."bookingStatus",
-        b."createdAt"
+        ARRAY_AGG(
+          JSON_BUILD_OBJECT(
+            'addonId', a.id,
+            'addonName', a."addonName",
+            'addonValue', a."addonValue"
+          )
+        ) AS "addons" -- Aggregate addons into an array of JSON objects
       FROM "Booking" b
       LEFT JOIN "User" u ON b."userId" = u.id
       LEFT JOIN "Car" c ON b."carId" = c.id
+      LEFT JOIN "BookingAddon" ba ON b.id = ba."bookingId"
+      LEFT JOIN "Addon" a ON ba."addonId" = a.id
       WHERE b.id = $1
-    `,
+      GROUP BY b.id, u.name, u.phone, c.id, c.name
+      `,
       [bookingId]
     );
 
-    // Check if a category was found
+    // Check if a booking was found
     if (result.rows.length > 0) {
-      return result.rows[0]; // Return the single category object
+      const booking = result.rows[0];
+
+      // Parse the "addons" field if needed
+      booking.addons = booking.addons ? booking.addons : [];
+
+      return booking; // Return the booking with addons
     } else {
       console.log("No booking found for id:", bookingId);
       return null;
     }
   } catch (error) {
-    console.error("Error fetching category by ID:", error);
+    console.error("Error fetching booking by ID:", error);
     throw error; // Optionally rethrow the error for further handling
+  }
+}
+
+const BookingFormSchema = z.object({
+  userId: z.string().nullable().optional(),
+  userName: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  carId: z.coerce.number().nullable().optional(),
+  carName: z.string().nullable().optional(),
+  bookingDate: z.string().nullable().optional(),
+  amount: z.coerce.number().nullable().optional(),
+  departure: z.string().nullable().optional(),
+  destination: z.string().nullable().optional(),
+  paymentStatus: z.string().nullable().optional(),
+  bookType: z.string().nullable().optional(),
+  paymentType: z.string().nullable().optional(),
+  bookingStatus: z.string().nullable().optional(),
+  createdAt: z.string().nullable().optional(),
+  departureLatitude: z.string().nullable().optional(),
+  departureLongitude: z.string().nullable().optional(),
+  destinationLatitude: z.string().nullable().optional(),
+  destinationLongitude: z.string().nullable().optional(),
+  addon: z
+    .array(
+      z.object({
+        name: z.string().nullable().optional(),
+        value: z.coerce.number().nullable().optional(),
+      })
+    )
+    .nullable()
+    .optional(),
+});
+
+export async function updateBooking(
+  id: number,
+  prevState: BookingActionState,
+  formData: FormData
+): Promise<BookingActionState> {
+  const validatedFields = BookingFormSchema.safeParse({
+    userId: formData.get("userId"),
+    userName: formData.get("userName"),
+    phone: formData.get("phone"),
+    carId: formData.get("carId"),
+    carName: formData.get("carName"),
+    bookingDate: formData.get("bookingDate"),
+    amount: formData.get("amount"),
+    departure: formData.get("departure"),
+    destination: formData.get("destination"),
+    paymentStatus: formData.get("paymentStatus"),
+    bookType: formData.get("bookType"),
+    paymentType: formData.get("paymentType"),
+    bookingStatus: formData.get("bookingStatus"),
+    createdAt: formData.get("createdAt"),
+    departureLatitude: formData.get("departureLatitude"),
+    departureLongitude: formData.get("departureLongitude"),
+    destinationLatitude: formData.get("destinationLatitude"),
+    destinationLongitude: formData.get("destinationLongitude"),
+    addon: formData.getAll("addon").map((addon, index) => ({
+      name: addon,
+      value: formData.getAll("value")[index],
+    })),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing Fields. Failed to Create Booking.",
+    };
+  }
+
+  const { paymentStatus, bookType, paymentType, bookingStatus } =
+    validatedFields.data;
+
+  try {
+    // Prepare the update query and values array
+    let updateFields = [];
+    let values = [id]; // Start the values array with the ID for where clause
+
+    // Conditionally add the fields to be updated based on the available data
+    if (paymentStatus) {
+      updateFields.push(`"paymentStatus" = $${updateFields.length + 2}`);
+      values.push(paymentStatus);
+    }
+
+    if (bookType) {
+      updateFields.push(`"bookType" = $${updateFields.length + 2}`);
+      values.push(bookType);
+    }
+
+    if (paymentType) {
+      updateFields.push(`"paymentType" = $${updateFields.length + 2}`);
+      values.push(paymentType);
+    }
+
+    if (bookingStatus) {
+      updateFields.push(`"bookingStatus" = $${updateFields.length + 2}`);
+      values.push(bookingStatus);
+    }
+
+    // Ensure at least one field is present to update
+    if (updateFields.length === 0) {
+      throw new Error("No valid fields to update.");
+    }
+
+    // Create the SET clause by joining the updated fields
+    const setClause = updateFields.join(", ");
+
+    // Update Booking details
+    const result = await pool.query(
+      `
+      UPDATE "Booking"
+      SET ${setClause}
+      WHERE id = $1
+      RETURNING id
+    `,
+      values
+    );
+
+    // Return result
+    return { message: "Booking updated successfully" };
+  } catch (error) {
+    // Rollback the transaction in case of error
+    console.error("Error updating :", error);
+    return { state_error: "Error updating " };
+  }
+  redirect("/dashboard/cars?success=true");
+}
+
+export async function fetchCardData(startDate: string, endDate: string) {
+  try {
+    // Base query for counting bookings
+    let baseQuery = `
+      SELECT 
+        COUNT(*) 
+      FROM "Booking" 
+      WHERE "bookingStatus" = $1
+    `;
+    const queryParams: string[] = ["CONFIRMED"];
+
+    // Add date range filter if both startDate and endDate are provided
+    if (startDate && endDate) {
+      baseQuery += ` AND "createdAt" BETWEEN $2 AND $3`;
+      queryParams.push(startDate, endDate); // Add the date parameters
+    } else if (startDate) {
+      baseQuery += ` AND "createdAt" >= $2`;
+      queryParams.push(startDate); // Add the startDate parameter
+    } else if (endDate) {
+      baseQuery += ` AND "createdAt" <= $2`;
+      queryParams.push(endDate); // Add the endDate parameter
+    }
+
+    // Count the confirmed bookings
+    const paidBookingCountPromise = pool.query(baseQuery, queryParams);
+
+    // Reset queryParams for cancelled bookings
+    const cancelledQueryParams = ["CANCELLED"];
+    let cancelledBookingCountPromise;
+
+    if (startDate && endDate) {
+      cancelledBookingCountPromise = pool.query(
+        baseQuery + ` AND "createdAt" BETWEEN $2 AND $3`,
+        ["CANCELLED", startDate, endDate]
+      );
+    } else {
+      cancelledBookingCountPromise = pool.query(baseQuery, ["CANCELLED"]);
+    }
+
+    // Sum the transactions for confirmed and cancelled bookings
+    let transactionsStatusQuery = `
+      SELECT
+        SUM(CASE WHEN "bookingStatus" = 'CONFIRMED' THEN amount ELSE 0 END) AS "paid",
+        SUM(CASE WHEN "bookingStatus" = 'CANCELLED' THEN amount ELSE 0 END) AS "cancelled"
+      FROM "Booking"
+    `;
+    const transactionsQueryParams: string[] = [];
+
+    if (startDate && endDate) {
+      transactionsQueryParams.push(startDate, endDate);
+      transactionsStatusQuery += ` WHERE "createdAt" BETWEEN $1 AND $2`;
+    }
+
+    const transactionsStatusPromise = pool.query(
+      transactionsStatusQuery,
+      transactionsQueryParams
+    );
+
+    // Wait for all queries to finish
+    const data = await Promise.all([
+      paidBookingCountPromise,
+      cancelledBookingCountPromise,
+      transactionsStatusPromise,
+    ]);
+
+    // Extract the results from the database queries
+    const numberOfPaidBooking = Number(data[0].rows[0].count ?? "0");
+    const numberOfCancelledBooking = Number(data[1].rows[0].count ?? "0");
+    const totalPaidBookings = formatCurrency(data[2].rows[0].paid ?? "0");
+    const totalCancelledBookings = formatCurrency(
+      data[2].rows[0].cancelled ?? "0" // Correct field for cancelled bookings
+    );
+
+    // Return the aggregated results
+    return {
+      numberOfPaidBooking,
+      numberOfCancelledBooking,
+      totalPaidBookings,
+      totalCancelledBookings,
+    };
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch card data.");
+  }
+}
+
+export async function fetchLatestBookings(
+  startDate: string,
+  endDate: string
+): Promise<BookingData[]> {
+  try {
+    let queryString = `
+      SELECT 
+        b.id,
+        u.name AS "userName",
+        u.email,
+        u.phone,
+        c.name AS "carName",
+        c."imageUrl",
+        c."categoryId",
+        cat.name AS "categoryName",
+        b.amount 
+      FROM "Booking" b
+      LEFT JOIN "User" u ON b."userId" = u.id
+      LEFT JOIN "Car" c ON b."carId" = c.id
+      LEFT JOIN "Category" cat ON c."categoryId" = cat.id
+    `;
+
+    const queryParams: string[] = [];
+
+    // Add date filtering if startDate and endDate are provided
+    if (startDate && endDate) {
+      queryString += ` WHERE b."createdAt" BETWEEN $1 AND $2`;
+      queryParams.push(startDate, endDate);
+    } else if (startDate) {
+      queryString += ` WHERE b."createdAt" >= $1`;
+      queryParams.push(startDate);
+    } else if (endDate) {
+      queryString += ` WHERE b."createdAt" <= $1`;
+      queryParams.push(endDate);
+    }
+
+    // Limit the results to the latest 5 bookings
+    queryString += ` ORDER BY b."createdAt" DESC LIMIT 5`;
+
+    // Execute the query with the constructed queryString and queryParams
+    const result = await pool.query(queryString, queryParams);
+
+    return result.rows;
+  } catch (error) {
+    console.error("Error fetching latest bookings:", error);
+    throw new Error("Failed to fetch bookings.");
   }
 }

@@ -1,3 +1,5 @@
+import { BookingData } from "./definitions";
+
 export const generatePagination = (currentPage: number, totalPages: number) => {
   // If the total number of pages is 7 or less,
   // display all pages without any ellipsis.
@@ -29,4 +31,62 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     "...",
     totalPages,
   ];
+};
+
+export const formatCurrency = (amount: number) => {
+  return (amount / 100).toLocaleString("en-KE", {
+    style: "currency",
+    currency: "KES",
+  });
+};
+
+// Function to group bookings by categoryName and sum the amounts
+
+export const groupBookingsByCategory = (bookings: BookingData[]) => {
+  const categoryTotals: Record<string, number> = {};
+
+  console.log(bookings);
+
+  // Group by category and sum amounts
+  bookings.forEach((booking) => {
+    const amount = parseFloat(booking.amount);
+
+    if (!categoryTotals[booking.categoryName]) {
+      categoryTotals[booking.categoryName] = 0;
+    }
+    categoryTotals[booking.categoryName] += amount;
+  });
+
+  console.log(categoryTotals);
+
+  // Convert to an array of objects with categoryName and categoryTotal
+  return Object.entries(categoryTotals).map(
+    ([categoryName, categoryTotal]) => ({
+      categoryName,
+      categoryTotal,
+    })
+  );
+};
+
+// Modified generateYAxis function
+export const generateYAxis = (bookings: BookingData[]) => {
+  // Step 1: Group the data by categoryName
+  const categoryTotals = groupBookingsByCategory(bookings);
+
+  console.log(categoryTotals);
+
+  // Step 2: Find the highest revenue across all categories
+  const highestRecord = Math.max(
+    ...categoryTotals.map((item) => item.categoryTotal)
+  ); // Access categoryTotal from each item
+  const topLabel = Math.ceil(highestRecord / 1000) * 1000;
+
+  // Step 3: Create Y-axis labels
+  const yAxisLabels = [];
+  for (let i = topLabel; i >= 0; i -= 1000) {
+    yAxisLabels.push(`$${i / 1000}K`);
+  }
+
+  // Return the Y-axis labels and the top label for scaling
+  return { yAxisLabels, topLabel };
 };
