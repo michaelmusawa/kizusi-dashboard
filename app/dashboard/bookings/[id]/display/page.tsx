@@ -27,11 +27,11 @@ const Page = async ({ params }: { params: Params }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="col-span-1">
               <Image
-                src={booking?.user?.image ?? "/car.svg"}
+                src={booking?.user?.image ?? "/profile.png"}
                 alt="User"
-                width={100}
-                height={100}
-                className="w-32 h-32 rounded-full object-cover"
+                width={60}
+                height={60}
+                className="border"
               />
             </div>
             <div className="col-span-2">

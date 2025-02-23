@@ -17,7 +17,8 @@ const BookingsTable = async ({
     query,
     startDate,
     endDate,
-    currentPage
+    currentPage,
+    ""
   );
 
   const getStatusClass = (status: string) => {

@@ -13,14 +13,15 @@ const NotificationPage = async ({
   endDate: string;
   currentPage: number;
 }) => {
+  const notification = "false";
+
   const bookings = await fetchFilteredBookings(
     query,
     startDate,
     endDate,
-    currentPage
+    currentPage,
+    notification
   );
-
-  console.log("notification bookings", bookings);
 
   return <NotificationTable bookings={bookings} />;
 };

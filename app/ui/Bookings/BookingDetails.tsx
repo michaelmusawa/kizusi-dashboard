@@ -177,6 +177,7 @@ const BookingDetails = ({ booking }: { booking: BookingState }) => {
             </h2>
             <div>
               <form action={formAction}>
+                <input type="hidden" name="viewed" defaultValue="true" />
                 <input
                   type="text"
                   name={modalAction.field}

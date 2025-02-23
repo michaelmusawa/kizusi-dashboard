@@ -43,6 +43,7 @@ model Booking {
   addons        BookingAddon[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime?      @updatedAt
+  viewed        String         @default("false")
 }
 
 model BookingAddon {

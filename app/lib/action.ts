@@ -864,13 +864,14 @@ export async function fetchFilteredBookings(
   query: string,
   startDate: string,
   endDate: string,
-  currentPage: number
+  currentPage: number,
+  notification: string
 ): Promise<BookingState[]> {
   const ITEMS_PER_PAGE = 10;
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    // Create the base SQL query with the date filtering conditions
+    // Base SQL query with the date filtering conditions
     let queryString = `
       SELECT 
         b.id, 
@@ -893,28 +894,30 @@ export async function fetchFilteredBookings(
       LEFT JOIN "User" u ON b."userId" = u.id
       LEFT JOIN "Car" c ON b."carId" = c.id
       WHERE 
-        (u.name ILIKE $1 OR c.name ILIKE $1)`;
+        (b.viewed = $1 OR $1 = '') AND
+        (u.name ILIKE $2 OR c.name ILIKE $2)`;
 
-    // If both startDate and endDate are provided, add date range filter
-    const queryParams = [`%${query}%`];
+    // Array to store query parameters
+    const queryParams = [notification, `%${query}%`];
 
+    // Adding date filters if provided
     if (startDate && endDate) {
-      queryString += ` AND b."bookingDate" BETWEEN $2 AND $3`;
+      queryString += ` AND b."bookingDate" BETWEEN $3 AND $4`;
       queryParams.push(startDate, endDate);
     } else if (startDate) {
-      queryString += ` AND b."bookingDate" >= $2`;
+      queryString += ` AND b."bookingDate" >= $3`;
       queryParams.push(startDate);
     } else if (endDate) {
-      queryString += ` AND b."bookingDate" <= $2`;
+      queryString += ` AND b."bookingDate" <= $3`;
       queryParams.push(endDate);
     }
 
-    // Add pagination and order
+    // Pagination and ordering
     queryString += `
       ORDER BY b."createdAt" ASC
       LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
 
-    // Add pagination params to queryParams array
+    // Add pagination params to queryParams
     queryParams.push(ITEMS_PER_PAGE, offset);
 
     // Execute the query
@@ -1013,6 +1016,7 @@ const BookingFormSchema = z.object({
   departureLongitude: z.string().nullable().optional(),
   destinationLatitude: z.string().nullable().optional(),
   destinationLongitude: z.string().nullable().optional(),
+  viewed: z.string().nullable().optional(),
   addon: z
     .array(
       z.object({
@@ -1048,6 +1052,7 @@ export async function updateBooking(
     departureLongitude: formData.get("departureLongitude"),
     destinationLatitude: formData.get("destinationLatitude"),
     destinationLongitude: formData.get("destinationLongitude"),
+    viewed: formData.get("viewed"),
     addon: formData.getAll("addon").map((addon, index) => ({
       name: addon,
       value: formData.getAll("value")[index],
@@ -1057,11 +1062,11 @@ export async function updateBooking(
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: "Missing Fields. Failed to Create Booking.",
+      message: "Missing Fields. Failed to update Booking.",
     };
   }
 
-  const { paymentStatus, bookType, paymentType, bookingStatus } =
+  const { paymentStatus, bookType, paymentType, bookingStatus, viewed } =
     validatedFields.data;
 
   try {
@@ -1088,6 +1093,10 @@ export async function updateBooking(
     if (bookingStatus) {
       updateFields.push(`"bookingStatus" = $${updateFields.length + 2}`);
       values.push(bookingStatus);
+    }
+    if (viewed) {
+      updateFields.push(`"viewed" = $${updateFields.length + 2}`);
+      values.push(viewed);
     }
 
     // Ensure at least one field is present to update
@@ -1149,10 +1158,30 @@ export async function fetchCardData(startDate: string, endDate: string) {
     const cancelledQueryParams = ["CANCELLED"];
     let cancelledBookingCountPromise;
 
+    // Modify base query for cancelled bookings with date filters
     if (startDate && endDate) {
       cancelledBookingCountPromise = pool.query(
-        baseQuery + ` AND "createdAt" BETWEEN $2 AND $3`,
+        baseQuery.replace(
+          '"bookingStatus" = $1',
+          '"bookingStatus" = $1 AND "createdAt" BETWEEN $2 AND $3'
+        ),
         ["CANCELLED", startDate, endDate]
+      );
+    } else if (startDate) {
+      cancelledBookingCountPromise = pool.query(
+        baseQuery.replace(
+          '"bookingStatus" = $1',
+          '"bookingStatus" = $1 AND "createdAt" >= $2'
+        ),
+        ["CANCELLED", startDate]
+      );
+    } else if (endDate) {
+      cancelledBookingCountPromise = pool.query(
+        baseQuery.replace(
+          '"bookingStatus" = $1',
+          '"bookingStatus" = $1 AND "createdAt" <= $2'
+        ),
+        ["CANCELLED", endDate]
       );
     } else {
       cancelledBookingCountPromise = pool.query(baseQuery, ["CANCELLED"]);
@@ -1170,6 +1199,12 @@ export async function fetchCardData(startDate: string, endDate: string) {
     if (startDate && endDate) {
       transactionsQueryParams.push(startDate, endDate);
       transactionsStatusQuery += ` WHERE "createdAt" BETWEEN $1 AND $2`;
+    } else if (startDate) {
+      transactionsQueryParams.push(startDate);
+      transactionsStatusQuery += ` WHERE "createdAt" >= $1`;
+    } else if (endDate) {
+      transactionsQueryParams.push(endDate);
+      transactionsStatusQuery += ` WHERE "createdAt" <= $1`;
     }
 
     const transactionsStatusPromise = pool.query(
@@ -1189,7 +1224,7 @@ export async function fetchCardData(startDate: string, endDate: string) {
     const numberOfCancelledBooking = Number(data[1].rows[0].count ?? "0");
     const totalPaidBookings = formatCurrency(data[2].rows[0].paid ?? "0");
     const totalCancelledBookings = formatCurrency(
-      data[2].rows[0].cancelled ?? "0" // Correct field for cancelled bookings
+      data[2].rows[0].cancelled ?? "0"
     );
 
     // Return the aggregated results

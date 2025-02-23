@@ -1,14 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useActionState, useState } from "react";
 import BookingDetails from "../Bookings/BookingDetails";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { updateBooking } from "@/app/lib/action";
+import { BookingActionState } from "@/app/lib/definitions";
 
 const NotificationTable = ({ bookings }: { bookings: any }) => {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
 
-  const handleViewToggle = async (bookingId: string) => {
+  const initialState: BookingActionState = {
+    message: null,
+    errors: {},
+    state_error: null,
+  };
+
+  const updateBookingWithId = updateBooking.bind(
+    null,
+    selectedBooking?.id ?? ""
+  );
+  const [state, formAction] = useActionState(updateBookingWithId, initialState);
+
+  const handleViewToggle = (bookingId: string) => {
     if (selectedBooking?.id === bookingId && showDetails) {
       setShowDetails(false);
     } else {
@@ -17,6 +32,7 @@ const NotificationTable = ({ bookings }: { bookings: any }) => {
       setShowDetails(true);
     }
   };
+
   const getStatusClass = (status: string) => {
     switch (status) {
       case "CONFIRMED":
@@ -27,6 +43,17 @@ const NotificationTable = ({ bookings }: { bookings: any }) => {
         return "";
     }
   };
+
+  if (state.message) {
+    if (state.errors) {
+      toast.error(state.message, {
+        id: "error",
+      });
+    }
+  } else if (state.state_error) {
+    toast.error(state.state_error, { id: "state_error" });
+  }
+
   return (
     <div className="mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Notifications</h1>
@@ -93,14 +120,18 @@ const NotificationTable = ({ bookings }: { bookings: any }) => {
                   </span>
                 </td>
                 <td className="p-4 border-b">
-                  <button
-                    onClick={() => handleViewToggle(booking.id)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded-lg"
-                  >
-                    {showDetails && selectedBooking.id === booking.id
-                      ? "Hide"
-                      : "View"}
-                  </button>
+                  <form action={formAction}>
+                    <input type="hidden" name="viewed" defaultValue="true" />
+                    <button
+                      type="submit"
+                      onClick={() => handleViewToggle(booking.id)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded-lg"
+                    >
+                      {showDetails && selectedBooking.id === booking.id
+                        ? "Hide"
+                        : "View"}
+                    </button>
+                  </form>
                 </td>
               </tr>
             ))}

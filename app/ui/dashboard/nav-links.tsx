@@ -31,12 +31,21 @@ const links = [
   },
 ];
 
-export default function NavLinks() {
+export default function NavLinks({ notify }: { notify: number }) {
   const pathname = usePathname();
+
   return (
     <>
       {links.map((link) => {
         const LinkIcon = link.icon;
+
+        // Check if it's the Notifications link and apply special styles if notify > 0
+        const isNotificationLink = link.name === "Notifications";
+        const notificationTextClass =
+          notify > 0 && link.name === "Notifications"
+            ? "text-red-500" // Change text color for notifications
+            : "text-gray-600"; // Default text color
+
         return (
           <Link
             key={link.name}
@@ -48,8 +57,14 @@ export default function NavLinks() {
               }
             )}
           >
-            <LinkIcon className="w-6" />
-            <p className="hidden md:block">{link.name}</p>
+            <LinkIcon
+              className={clsx("w-6", {
+                "animate-shake": isNotificationLink && notify > 0, // Apply shake only to icon if notify > 0
+              })}
+            />
+            <p className={clsx("hidden md:block", notificationTextClass)}>
+              {link.name}
+            </p>
           </Link>
         );
       })}

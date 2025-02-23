@@ -79,6 +79,7 @@ export type BookingActionState = {
     departureLongitude?: string[];
     destinationLatitude?: string[];
     destinationLongitude?: string[];
+    viewed?: string[];
     addons?: Addon[];
   };
   state_error?: string | null;

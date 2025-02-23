@@ -25,7 +25,7 @@ const CarCard: FC<CarState> = ({
         alt={`${name} ${brand}`}
         width={2070}
         height={1380}
-        className="w-full h-full rounded-2xl"
+        className="w-full h-56 rounded-2xl"
       />
       <div className="flex flex-col gap-2 p-4">
         <div className="flex justify-between">
@@ -76,13 +76,15 @@ const CategoryCard: FC<CategoryState> = ({
 }) => {
   return (
     <div className="relative rounded-2xl shadow-lg">
-      <Image
-        src={image}
-        alt={`${name}`}
-        width={2070}
-        height={1380}
-        className="w-full h-full mb-4 rounded-2xl"
-      />
+      <div className="w-full h-56 overflow-hidden">
+        <Image
+          src={image}
+          alt={`${name}`}
+          width={2070}
+          height={1380}
+          className="w-full h-auto mb-4 rounded-2xl"
+        />
+      </div>
 
       <div className="flex flex-col gap-2 p-4">
         <div className="flex justify-between">
