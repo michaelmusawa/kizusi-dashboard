@@ -60,6 +60,8 @@ model Transaction {
   booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   bookingId   String   
   amount      Decimal  @db.Decimal(10, 2)
+  confirmationCode String?
+  paymentMethod String?
   status      String   @default("PENDING") // PENDING, SUCCESS, FAILED
   reference   String   @unique
   createdAt   DateTime @default(now())
