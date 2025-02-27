@@ -4,8 +4,10 @@ import { createCar } from "@/app/lib/action";
 import { CarActionState, CategoryState } from "@/app/lib/definitions";
 import CarForm from "@/app/ui/forms/carForm";
 import Link from "next/link";
-import { useActionState } from "react";
+import router from "next/router";
+import { useActionState, useEffect } from "react";
 import toast from "react-hot-toast";
+
 const CreateCar = ({ categories }: { categories: CategoryState[] }) => {
   const initialState: CarActionState = {
     message: null,
@@ -15,23 +17,39 @@ const CreateCar = ({ categories }: { categories: CategoryState[] }) => {
 
   const [state, formAction] = useActionState(createCar, initialState);
 
-  if (state.message) {
-    if (state.errors) {
-      toast.error(state.message, {
-        id: "error",
-      });
-    } else {
-      toast.success(state.message, {
-        id: "success",
-      });
+  // if (state.message) {
+  //   if (state.errors) {
+  //     toast.error(state.message, {
+  //       id: "error",
+  //     });
+  //   } else {
+  //     toast.success(state.message, {
+  //       id: "success",
+  //     });
 
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+  //     setTimeout(() => {
+  //       window.location.reload();
+  //     }, 3000);
+  //   }
+  // } else if (state.state_error) {
+  //   toast.error(state.state_error, { id: "state_error" });
+  // }
+
+  useEffect(() => {
+    if (state.message) {
+      if (state.errors) {
+        toast.error(state.message, { id: "error" });
+      } else {
+        toast.success(state.message, { id: "success" });
+        const timer = setTimeout(() => {
+          router.push("/dashboard/cars/create");
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    } else if (state.state_error) {
+      toast.error(state.state_error, { id: "state_error" });
     }
-  } else if (state.state_error) {
-    toast.error(state.state_error, { id: "state_error" });
-  }
+  }, [state, router]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
