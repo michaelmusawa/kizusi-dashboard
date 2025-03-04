@@ -2,6 +2,7 @@
 
 import { CarState, CategoryState } from "@/app/lib/definitions";
 import React, { useEffect, useState } from "react";
+import Cancel from "../icons/Cancel";
 
 const CarForm: React.FC<{
   car?: CarState;
@@ -89,7 +90,7 @@ const CarForm: React.FC<{
           defaultValue={car?.name ?? ""}
           name="name"
           placeholder="Enter car name"
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           required
         />
       </div>
@@ -100,7 +101,7 @@ const CarForm: React.FC<{
           name="category"
           defaultValue={car?.category.name ?? ""}
           onChange={(e) => setCategory(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           required
         >
           <option value="">Select Category</option>
@@ -119,7 +120,7 @@ const CarForm: React.FC<{
           name="brand"
           value={brand}
           onChange={(e) => setBrand(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           required
         >
           <option value="">Select Brand</option>
@@ -139,7 +140,7 @@ const CarForm: React.FC<{
           <div key={index} className="flex space-x-4 mb-2">
             <select
               name="feature"
-              className="w-1/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-1/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
               value={feature.name}
               onChange={(e) =>
                 handleFeatureChange(index, "name", e.target.value)
@@ -156,7 +157,7 @@ const CarForm: React.FC<{
               type="text"
               name="value"
               placeholder="Value"
-              className="w-2/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-2/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
               value={feature.value}
               onChange={(e) =>
                 handleFeatureChange(index, "value", e.target.value)
@@ -166,16 +167,16 @@ const CarForm: React.FC<{
             <button
               type="button"
               onClick={() => handleRemoveFeature(index)}
-              className="text-red-500"
+              className="text-primaryColor"
             >
-              Remove
+              <Cancel />
             </button>
           </div>
         ))}
         <button
           type="button"
           onClick={handleAddFeature}
-          className="text-blue-500"
+          className="text-secondaryColor"
         >
           Add Feature
         </button>
@@ -219,16 +220,16 @@ const CarForm: React.FC<{
             <button
               type="button"
               onClick={() => handleRemoveAddon(index)}
-              className="text-red-500"
+              className="text-primaryColor"
             >
-              Remove
+              <Cancel />
             </button>
           </div>
         ))}
         <button
           type="button"
           onClick={handleAddAddon}
-          className="text-blue-500"
+          className="text-secondaryColor"
         >
           Add Addon
         </button>

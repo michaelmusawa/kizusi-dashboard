@@ -3,7 +3,7 @@ import Link from "next/link";
 import React from "react";
 import { CarCard } from "./carCard";
 
-const CarDisplay = async ({
+const CarsDisplay = async ({
   query,
   currentPage,
 }: {
@@ -14,7 +14,7 @@ const CarDisplay = async ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {cars.map((car) => (
-        <Link key={car.id} href={`/dashboard/cars/${car.id}/edit`}>
+        <Link key={car.id} href={`/dashboard/cars/${car.id}/display`}>
           <CarCard key={car.id} {...car} />
         </Link>
       ))}
@@ -22,4 +22,4 @@ const CarDisplay = async ({
   );
 };
 
-export default CarDisplay;
+export default CarsDisplay;

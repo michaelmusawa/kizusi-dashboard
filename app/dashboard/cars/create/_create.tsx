@@ -17,24 +17,6 @@ const CreateCar = ({ categories }: { categories: CategoryState[] }) => {
 
   const [state, formAction] = useActionState(createCar, initialState);
 
-  // if (state.message) {
-  //   if (state.errors) {
-  //     toast.error(state.message, {
-  //       id: "error",
-  //     });
-  //   } else {
-  //     toast.success(state.message, {
-  //       id: "success",
-  //     });
-
-  //     setTimeout(() => {
-  //       window.location.reload();
-  //     }, 3000);
-  //   }
-  // } else if (state.state_error) {
-  //   toast.error(state.state_error, { id: "state_error" });
-  // }
-
   useEffect(() => {
     if (state.message) {
       if (state.errors) {

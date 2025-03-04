@@ -5,11 +5,11 @@ const Car = () => {
   return (
     <div>
       <Image
-        src="/car.svg"
+        src="/images/car.png"
         alt="Car icon"
-        width={24}
-        height={24}
-        className="w-5 h-5"
+        width={500}
+        height={500}
+        className="w-8 h-8"
       />
     </div>
   );

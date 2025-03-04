@@ -39,21 +39,21 @@ export default function NavLinks({ notify }: { notify: number }) {
       {links.map((link) => {
         const LinkIcon = link.icon;
 
-        // Check if it's the Notifications link and apply special styles if notify > 0
         const isNotificationLink = link.name === "Notifications";
         const notificationTextClass =
           notify > 0 && link.name === "Notifications"
-            ? "text-red-500" // Change text color for notifications
-            : "text-gray-600"; // Default text color
+            ? "text-primaryColor"
+            : "text-gray-600";
 
         return (
           <Link
             key={link.name}
             href={link.href}
             className={clsx(
-              "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
+              "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-[rgba(88,184,201,0.15)] hover:text-primaryColor md:flex-none md:justify-start md:p-2 md:px-3",
               {
-                "bg-sky-100 text-blue-600": pathname === link.href,
+                "bg-[rgba(88,184,201,0.4)] text-primaryColor":
+                  pathname === link.href,
               }
             )}
           >

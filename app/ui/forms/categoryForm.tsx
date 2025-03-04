@@ -1,17 +1,16 @@
 import { CategoryState } from "@/app/lib/definitions";
 import { useState } from "react";
+import Cancel from "../icons/Cancel";
 
 const CategoryForm: React.FC<{ category?: CategoryState }> = ({ category }) => {
   const [brands, setBrands] = useState<string[]>(
     category?.brands ? category.brands.map((b) => ({ brand: b.brandName })) : []
   );
 
-  console.log("the brands", brands);
   const [existingBrands, setExistingBrands] = useState<string[]>([
     "Toyota",
     "Honda",
     "Tesla",
-    "Lexus",
     "BMW",
     "Benz",
   ]);
@@ -40,7 +39,7 @@ const CategoryForm: React.FC<{ category?: CategoryState }> = ({ category }) => {
           name="name"
           defaultValue={category?.categoryName ?? ""}
           placeholder="Enter category name"
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           required
         />
       </div>
@@ -55,7 +54,7 @@ const CategoryForm: React.FC<{ category?: CategoryState }> = ({ category }) => {
               list="brand-options"
               name="brand"
               defaultValue={brand.brand}
-              className="w-1/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-1/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
               onChange={(e) => handleBrandChange(index, e.target.value)}
               required
             />
@@ -69,9 +68,9 @@ const CategoryForm: React.FC<{ category?: CategoryState }> = ({ category }) => {
             <button
               type="button"
               onClick={() => handleRemoveBrand(index)}
-              className="text-red-500"
+              className="text-primaryColor"
             >
-              Remove
+              <Cancel />
             </button>
           </div>
         ))}
@@ -79,7 +78,7 @@ const CategoryForm: React.FC<{ category?: CategoryState }> = ({ category }) => {
         <button
           type="button"
           onClick={handleAddBrand}
-          className="text-blue-500"
+          className="text-secondaryColor"
         >
           Add Brand
         </button>
@@ -92,7 +91,7 @@ const CategoryForm: React.FC<{ category?: CategoryState }> = ({ category }) => {
           defaultValue={category?.price ?? ""}
           type="number"
           placeholder="Enter price"
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           required
         />
       </div>
@@ -103,7 +102,7 @@ const CategoryForm: React.FC<{ category?: CategoryState }> = ({ category }) => {
           name="description"
           defaultValue={category?.description ?? ""}
           placeholder="Enter car description"
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           rows={4}
           required
         ></textarea>
@@ -115,7 +114,7 @@ const CategoryForm: React.FC<{ category?: CategoryState }> = ({ category }) => {
           type="text"
           name="image"
           defaultValue={category?.imageUrl ?? ""}
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           accept="image/*"
           required
         />

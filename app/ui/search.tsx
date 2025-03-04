@@ -22,7 +22,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
   }, 300);
 
   return (
-    <div className="relative flex flex-1 flex-shrink-0">
+    <div className="relative flex flex-1 flex-shrink-0 shadow-sm">
       <label htmlFor="search" className="sr-only">
         Search
       </label>

@@ -1,5 +1,5 @@
 import { getCategoryById } from "@/app/lib/action";
-import EditCategory from "./_edit";
+import CategoryDisplay from "@/app/ui/category/CategoryDisplay";
 
 const Page = async (props: {
   params?: Promise<{
@@ -14,7 +14,7 @@ const Page = async (props: {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
-        <EditCategory category={category} id={id} />
+        <CategoryDisplay category={category} />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { fetchCarPages } from "@/app/lib/action";
-import CarDisplay from "@/app/ui/car/CarDisplay";
+import CarsDisplay from "@/app/ui/car/CarsDisplay";
 import CarDisplaySkeleton from "@/app/ui/car/CarDisplaySkeleton";
 import SuccessMessage from "@/app/ui/messageModal";
 import Pagination from "@/app/ui/pagination";
@@ -21,24 +21,24 @@ const Page = async (props: {
   const totalPages = await fetchCarPages(query);
   return (
     <main className="min-h-full bg-gray-100 p-6 relative">
-      <div className="bg-white shadow-md rounded-lg p-4 min-h-full">
+      <div className="bg-white shadow-md rounded-lg px-4 pt-4 pb-14 min-h-full">
         <div aria-live="polite" aria-atomic="true">
           {success && <SuccessMessage message="Car updated successfully." />}
         </div>
         <div className="flex justify-between items-center mb-6 gap-4">
-          <Link href={"/dashboard/cars/create"}>
-            <button className="bg-blue-500 rounded-lg shadow-lg p-2 text-gray-50">
-              Add
+          <Link href="/dashboard/cars/create">
+            <button className="bg-secondaryColor rounded-lg shadow-lg p-2 text-gray-50">
+              Add car
             </button>
           </Link>
           <Search placeholder="Search car name, category or brand..." />
         </div>
 
         <Suspense key={query + currentPage} fallback={<CarDisplaySkeleton />}>
-          <CarDisplay query={query} currentPage={currentPage} />
+          <CarsDisplay query={query} currentPage={currentPage} />
         </Suspense>
       </div>
-      <div className="absolute bottom-4 flex w-full justify-center">
+      <div className="absolute bottom-8 flex w-full justify-center">
         <Pagination totalPages={totalPages} />
       </div>
     </main>

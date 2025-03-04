@@ -539,7 +539,9 @@ export async function createCategory(
     return { state_error: "Error creating category" };
   }
 }
-export async function getCategoryById(categoryId: string) {
+export async function getCategoryById(
+  categoryId: number
+): Promise<CategoryState> {
   try {
     const result = await pool.query(
       `
