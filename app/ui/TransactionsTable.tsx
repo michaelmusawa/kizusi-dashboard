@@ -1,5 +1,11 @@
 import React from "react";
 import { fetchFilteredTransactions } from "../lib/action";
+import {
+  formatCurrency,
+  formatDateToLocal,
+  formatTimeToLocal,
+  getStatusClass,
+} from "../lib/utils";
 
 const TransactionsTable = async ({
   query,
@@ -19,44 +25,42 @@ const TransactionsTable = async ({
     currentPage
   );
 
-  const getStatusClass = (status: string) => {
-    switch (status) {
-      case "CONFIRMED":
-        return "text-purple-500 bg-purple-100";
-      case "CANCELLED":
-        return "text-orange-500 bg-orange-100";
-      default:
-        return "";
-    }
-  };
-
   return (
-    <div>
-      <table className="w-full text-left border-collapse">
-        <thead>
+    <div className="overflow-x-auto">
+      <table className="min-w-full bg-white border border-gray-300 mx-auto">
+        <thead className="bg-[rgba(88,184,201,0.2)] text-secondaryColor max-lg:text-sm max-sm:text-xs">
           <tr>
-            <th className="p-4 border-b font-medium">No.</th>
+            <th className="border px-4 py-2">No.</th>
 
-            <th className="p-4 border-b font-medium">ID</th>
-            <th className="p-4 border-b font-medium">Reference</th>
-            <th className="p-4 border-b font-medium">Amount</th>
-            <th className="p-4 border-b font-medium">Booking ID</th>
-            <th className="p-4 border-b font-medium">Date & Time</th>
-            <th className="p-4 border-b font-medium">Status</th>
+            <th className="border px-4 py-2">ID</th>
+            <th className="border px-4 py-2">Reference</th>
+            <th className="border px-4 py-2">Amount</th>
+            <th className="border px-4 py-2">Booking ID</th>
+            <th className="border px-4 py-2">Date</th>
+            <th className="border px-4 py-2">Time</th>
+            <th className="border px-4 py-2">Status</th>
           </tr>
         </thead>
         <tbody>
           {transactions.map((transaction, index) => (
-            <tr key={index} className="hover:bg-gray-50">
-              <td className="p-4 border-b">{index + 1}</td>
-              <td className="p-4 border-b">{transaction.id}</td>
-              <td className="p-4 border-b">{transaction.reference}</td>
-              <td className="p-4 border-b">{transaction.amount}</td>
-              <td className="p-4 border-b">{transaction.bookingId}</td>
-              <td className="p-4 border-b">
-                {transaction.createdAt.toString()}
+            <tr
+              key={index}
+              className="max-lg:text-sm max-sm:text-xs hover:bg-gray-50 text-gray-700 font-medium"
+            >
+              <td className="border px-4 py-2">{index + 1}</td>
+              <td className="border px-4 py-2">{transaction.id}</td>
+              <td className="border px-4 py-2">{transaction.reference}</td>
+              <td className="border px-4 py-2">
+                {formatCurrency(transaction.amount)}
               </td>
-              <td className="p-4 border-b">
+              <td className="border px-4 py-2">{transaction.bookingId}</td>
+              <td className="border px-4 py-2">
+                {formatDateToLocal(transaction.createdAt.toString())}
+              </td>
+              <td className="border px-4 py-2">
+                {formatTimeToLocal(transaction.createdAt.toString())}
+              </td>
+              <td className="border px-4 py-2">
                 <span
                   className={`px-3 py-1 rounded-full text-sm ${getStatusClass(
                     transaction.status

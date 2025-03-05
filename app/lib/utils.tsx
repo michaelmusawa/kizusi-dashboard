@@ -34,7 +34,7 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
 };
 
 export const formatCurrency = (amount: number) => {
-  return (amount / 100).toLocaleString("en-KE", {
+  return (amount / 1).toLocaleString("en-KE", {
     style: "currency",
     currency: "KES",
   });
@@ -89,4 +89,64 @@ export const generateYAxis = (bookings: BookingData[]) => {
 
   // Return the Y-axis labels and the top label for scaling
   return { yAxisLabels, topLabel };
+};
+
+export const formatDateToLocal = (
+  dateStr: string,
+  locale: string = "en-US"
+) => {
+  const date = new Date(dateStr);
+  const options: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  };
+  const formatter = new Intl.DateTimeFormat(locale, options);
+  return formatter.format(date);
+};
+
+export const formatTimeToLocal = (
+  dateStr: string,
+  locale: string = "en-US"
+) => {
+  const date = new Date(dateStr);
+  const options: Intl.DateTimeFormatOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  return new Intl.DateTimeFormat(locale, options).format(date);
+};
+
+// utils/truncateText.ts
+export function truncateByWords(text: string, wordLimit: number = 3): string {
+  if (!text) {
+    return "";
+  }
+  const words = text.split(" ");
+  if (words.length <= wordLimit) return text;
+  return words.slice(0, wordLimit).join(" ") + "...";
+}
+
+export function toSentenceCase(text: string): string {
+  if (!text) return "";
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+export const getStatusClass = (status: string) => {
+  switch (status) {
+    case "PROCEEDED":
+      return "text-green-500 bg-green-100";
+    case "CONFIRMED":
+      return "text-green-500 bg-green-100";
+    case "SUCCESS":
+      return "text-green-500 bg-green-100";
+    case "PENDING":
+      return "text-orange-500 bg-orange-100";
+    case "NO SHOW":
+      return "text-red-500 bg-red-100";
+    case "FAILED":
+      return "text-red-500 bg-red-100";
+    default:
+      return "";
+  }
 };

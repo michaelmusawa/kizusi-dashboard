@@ -50,7 +50,7 @@ const CarForm: React.FC<{
   };
 
   const handleAddAddon = () => {
-    setAddons([...addons, { name: "", value: 0 }]);
+    setAddons([...addons, { name: "", value: null }]);
   };
 
   const handleFeatureChange = (index: number, field: string, value: string) => {
@@ -78,8 +78,6 @@ const CarForm: React.FC<{
     const updatedAddons = addons.filter((_, i) => i !== index);
     setAddons(updatedAddons);
   };
-
-  console.log("beginning category", car?.brand.brandName);
 
   return (
     <>
@@ -191,7 +189,7 @@ const CarForm: React.FC<{
           <div key={index} className="flex space-x-4 mb-2">
             <select
               name="addon"
-              className="w-1/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-1/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
               value={addon.name}
               onChange={(e) => handleAddonChange(index, "name", e.target.value)}
               required
@@ -210,10 +208,10 @@ const CarForm: React.FC<{
               type="number"
               name="value"
               placeholder="Value"
-              className="w-2/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-2/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
               value={addon.value}
               onChange={(e) =>
-                handleAddonChange(index, "value", +e.target.value)
+                handleAddonChange(index, "value", e.target.value)
               }
               required
             />
@@ -284,7 +282,7 @@ const CarForm: React.FC<{
           name="description"
           defaultValue={car?.description}
           placeholder="Enter car description"
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           rows={4}
           required
         ></textarea>
@@ -297,7 +295,7 @@ const CarForm: React.FC<{
           defaultValue={car?.price}
           type="number"
           placeholder="Enter price"
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           required
         />
       </div>
@@ -309,7 +307,7 @@ const CarForm: React.FC<{
           defaultValue={car?.image}
           type="text"
           placeholder="Image url"
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           required
         />
         {/* <input

@@ -44,7 +44,7 @@ export default async function RevenueChart({
               className="flex flex-col items-center gap-2"
             >
               <div
-                className="w-full rounded-md bg-blue-300"
+                className="w-full rounded-md bg-secondaryColor"
                 style={{
                   height: `${(chartHeight / topLabel) * cat.categoryTotal}px`,
                 }}

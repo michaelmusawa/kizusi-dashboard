@@ -15,90 +15,77 @@ const Page = async ({ params }: { params: Params }) => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Booking Details</h1>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
+        <BookingDetails booking={booking} />
 
-      <BookingDetails booking={booking} />
+        <div className="flex w-full border-t border-gray-300 mb-8"></div>
 
-      <div className="flex gap-4">
-        {/* User Information Section */}
-        <div className="flex-1 bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">User Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="col-span-1">
-              <Image
-                src={booking?.user?.image ?? "/profile.png"}
-                alt="User"
-                width={60}
-                height={60}
-                className="border"
-              />
-            </div>
-            <div className="col-span-2">
-              <div className="space-y-2">
-                <p>
-                  <span className="font-medium">Name:</span> {booking?.userName}
-                </p>
-                <p>
-                  <span className="font-medium">Email:</span> {booking?.email}
-                </p>
-                <p>
-                  <span className="font-medium">Phone:</span> {booking?.phone}
-                </p>
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* User Information Section */}
+          <div className="flex-1 p-4 relative rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300 ease-in-out">
+            <div className="flex items-center gap-6">
+              <div>
+                <Image
+                  src={booking?.user?.image ?? "/images/profile.png"}
+                  alt="User"
+                  width={80}
+                  height={80}
+                  className="rounded-full border-2 border-gray-300 bg-secondaryColor"
+                />
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Car Information Section */}
-        <div className="flex-1 bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Car Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="col-span-1">
-              <Image
-                src={car?.image ?? "/car.svg"}
-                alt={car?.name ?? "car image"}
-                width={400}
-                height={200}
-                className="w-full h-48 object-cover rounded-lg"
-              />
-            </div>
-            <div className="col-span-2">
-              <div className="space-y-2">
-                <p>
-                  <span className="font-medium">Name:</span> {car?.name}
-                </p>
-                <p>
-                  <span className="font-medium">Brand:</span>{" "}
-                  {car?.brand.brandName}
-                </p>
-                <p>
-                  <span className="font-medium">Category:</span>{" "}
-                  {car?.category.name}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {car?.features.map((feature, index) => (
-                    <span
-                      key={index}
-                      className="bg-gray-100 px-3 py-1 rounded-full text-sm"
-                    >
-                      {feature.featureName}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {booking?.addons.map((addon, index) => (
-                    <span
-                      key={index}
-                      className="bg-gray-100 px-3 py-1 rounded-full text-sm"
-                    >
-                      {addon.addonName}
-                    </span>
-                  ))}
+              <div className="flex">
+                <div className="space-y-3">
+                  <p className="text-lg text-gray-700">
+                    <span className="font-semibold">Name:</span>{" "}
+                    {booking?.userName}
+                  </p>
+                  <p className="text-lg text-gray-700">
+                    <span className="font-semibold">Email:</span>{" "}
+                    {booking?.email}
+                  </p>
+                  <p className="text-lg text-gray-700">
+                    <span className="font-semibold">Phone:</span>{" "}
+                    {booking?.phone}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Car Information Section */}
+          {car && (
+            <div className="flex-1 relative rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300 ease-in-out">
+              <div className="relative">
+                <Image
+                  src={car?.image}
+                  alt={`${car.name} ${car.brand.brandName}`}
+                  width={4000}
+                  height={2380}
+                  className="w-full h-52 object-cover"
+                />
+
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent" />
+
+                <div className="absolute inset-x-0 -bottom-20 p-4 flex flex-col items-center text-center">
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    {car.name}
+                  </h2>
+                  <div className="bg-white/40 mt-2 mb-2 text-sm font-semibold text-gray-800 px-3 py-1 rounded-full inline-block">
+                    {car.brand.brandName}
+                  </div>
+                  <p className="text-lg font-semibold text-secondaryColor">
+                    Ksh. {car.price}/day
+                  </p>
+                </div>
+              </div>
+              <div className="p-6 mt-12">
+                <p className="text-gray-700 mb-6 line-clamp-3">
+                  {car.description}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

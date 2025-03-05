@@ -50,16 +50,17 @@ export default function NavLinks({ notify }: { notify: number }) {
             key={link.name}
             href={link.href}
             className={clsx(
-              "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-[rgba(88,184,201,0.15)] hover:text-primaryColor md:flex-none md:justify-start md:p-2 md:px-3",
-              {
-                "bg-[rgba(88,184,201,0.4)] text-primaryColor":
-                  pathname === link.href,
-              }
+              "flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium hover:bg-[rgba(88,184,201,0.15)] hover:text-primaryColor md:flex-none md:justify-start md:p-2 md:px-3",
+              pathname === "/dashboard"
+                ? "bg-[rgba(88,184,201,0.2)] text-primaryColor"
+                : pathname.includes(link.href) && link.href !== "/dashboard"
+                ? "bg-[rgba(88,184,201,0.2)] text-primaryColor"
+                : "bg-gray-50"
             )}
           >
             <LinkIcon
               className={clsx("w-6", {
-                "animate-shake": isNotificationLink && notify > 0, // Apply shake only to icon if notify > 0
+                "animate-shake": isNotificationLink && notify > 0,
               })}
             />
             <p className={clsx("hidden md:block", notificationTextClass)}>

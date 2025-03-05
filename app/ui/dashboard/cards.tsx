@@ -6,7 +6,7 @@ import { lusitana } from "@/app/fonts/fonts";
 import { fetchCardData } from "@/app/lib/action";
 
 const iconMap = {
-  collected: MoneyIcon,
+  collected: UserGroupIcon,
   customers: UserGroupIcon,
   pending: Clock,
   invoices: Inbox,
@@ -26,13 +26,23 @@ export default async function CardWrapper({
     totalCancelledBookings,
   } = await fetchCardData(startDate, endDate);
 
+  console.log("card data", numberOfCancelledBooking);
+
   return (
     <>
-      <Card title="Collected" value={numberOfPaidBooking} type="collected" />
-      <Card title="Pending" value={numberOfCancelledBooking} type="pending" />
-      <Card title="Total Invoices" value={totalPaidBookings} type="invoices" />
+      <Card title="Clients" value={numberOfPaidBooking} type="collected" />
       <Card
-        title="Total Customers"
+        title="Reservations"
+        value={numberOfCancelledBooking}
+        type="pending"
+      />
+      <Card
+        title="Total reservations"
+        value={totalPaidBookings}
+        type="invoices"
+      />
+      <Card
+        title="Total paid amount"
         value={totalCancelledBookings}
         type="customers"
       />

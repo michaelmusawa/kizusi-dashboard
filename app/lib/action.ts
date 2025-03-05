@@ -880,9 +880,12 @@ export async function fetchFilteredBookings(
         b.id, 
         u.name AS "userName",
         u.phone,
+        u.email,
         c.id AS "carId",
         c.name AS "carName",
         b."bookingDate",
+        b."bookType",
+        b."paymentType",
         b.amount, 
         b.departure, 
         b."departureLatitude",
@@ -1121,7 +1124,7 @@ export async function updateBooking(
       values
     );
 
-    // Return result
+    revalidatePath(`/dashboard/bookings/${id}/display`);
     return { message: "Booking updated successfully" };
   } catch (error) {
     // Rollback the transaction in case of error
@@ -1138,7 +1141,7 @@ export async function fetchCardData(startDate: string, endDate: string) {
       SELECT 
         COUNT(*) 
       FROM "Booking" 
-      WHERE "bookingStatus" = $1
+      WHERE "paymentStatus" = $1
     `;
     const queryParams: string[] = ["CONFIRMED"];
 
@@ -1157,44 +1160,44 @@ export async function fetchCardData(startDate: string, endDate: string) {
     // Count the confirmed bookings
     const paidBookingCountPromise = pool.query(baseQuery, queryParams);
 
-    // Reset queryParams for cancelled bookings
-    const cancelledQueryParams = ["CANCELLED"];
+    // Reset queryParams for reserved bookings
+    const reservedQueryParams = ["reserve"];
     let cancelledBookingCountPromise;
 
-    // Modify base query for cancelled bookings with date filters
+    // Modify base query for reserved bookings with date filters
     if (startDate && endDate) {
       cancelledBookingCountPromise = pool.query(
         baseQuery.replace(
-          '"bookingStatus" = $1',
-          '"bookingStatus" = $1 AND "createdAt" BETWEEN $2 AND $3'
+          '"bookType" = $1',
+          '"bookType" = $1 AND "createdAt" BETWEEN $2 AND $3'
         ),
-        ["CANCELLED", startDate, endDate]
+        ["reserve", startDate, endDate]
       );
     } else if (startDate) {
       cancelledBookingCountPromise = pool.query(
         baseQuery.replace(
-          '"bookingStatus" = $1',
-          '"bookingStatus" = $1 AND "createdAt" >= $2'
+          '"bookType" = $1',
+          '"bookType" = $1 AND "createdAt" >= $2'
         ),
-        ["CANCELLED", startDate]
+        ["reserve", startDate]
       );
     } else if (endDate) {
       cancelledBookingCountPromise = pool.query(
         baseQuery.replace(
-          '"bookingStatus" = $1',
-          '"bookingStatus" = $1 AND "createdAt" <= $2'
+          '"bookType" = $1',
+          '"bookType" = $1 AND "createdAt" >= $2'
         ),
-        ["CANCELLED", endDate]
+        ["reserve", endDate]
       );
     } else {
-      cancelledBookingCountPromise = pool.query(baseQuery, ["CANCELLED"]);
+      cancelledBookingCountPromise = pool.query(baseQuery, ["reserve"]);
     }
 
     // Sum the transactions for confirmed and cancelled bookings
     let transactionsStatusQuery = `
       SELECT
-        SUM(CASE WHEN "bookingStatus" = 'CONFIRMED' THEN amount ELSE 0 END) AS "paid",
-        SUM(CASE WHEN "bookingStatus" = 'CANCELLED' THEN amount ELSE 0 END) AS "cancelled"
+        SUM(CASE WHEN "paymentType" = 'reserve' THEN amount ELSE 0 END) AS "paid",
+        SUM(CASE WHEN "paymentType" = 'full' THEN amount ELSE 0 END) AS "cancelled"
       FROM "Booking"
     `;
     const transactionsQueryParams: string[] = [];

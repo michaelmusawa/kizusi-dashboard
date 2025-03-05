@@ -6,6 +6,13 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { updateBooking } from "@/app/lib/action";
 import { BookingActionState } from "@/app/lib/definitions";
+import {
+  formatCurrency,
+  formatDateToLocal,
+  getStatusClass,
+  toSentenceCase,
+  truncateByWords,
+} from "@/app/lib/utils";
 
 const NotificationTable = ({ bookings }: { bookings: any }) => {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -30,17 +37,6 @@ const NotificationTable = ({ bookings }: { bookings: any }) => {
       const booking = bookings.find((booking) => booking.id === bookingId);
       setSelectedBooking(booking);
       setShowDetails(true);
-    }
-  };
-
-  const getStatusClass = (status: string) => {
-    switch (status) {
-      case "CONFIRMED":
-        return "text-purple-500 bg-purple-100";
-      case "CANCELLED":
-        return "text-orange-500 bg-orange-100";
-      default:
-        return "";
     }
   };
 
@@ -74,43 +70,58 @@ const NotificationTable = ({ bookings }: { bookings: any }) => {
       )}
 
       {/* Bookings Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-scroll">
-        <table className="w-full text-left border-collapse">
-          <thead>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-300 mx-auto">
+          <thead className="bg-[rgba(88,184,201,0.2)] text-secondaryColor max-lg:text-sm max-sm:text-xs">
             <tr>
-              <th className="p-4 border-b font-medium">No.</th>
+              <th className="border px-4 py-2">No.</th>
 
-              <th className="p-4 border-b font-medium">Customer Name</th>
-              <th className="p-4 border-b font-medium">Phone</th>
-              <th className="p-4 border-b font-medium">Car</th>
-              <th className="p-4 border-b font-medium">Book Type</th>
-              <th className="p-4 border-b font-medium">Pick-up</th>
-              <th className="p-4 border-b font-medium">Drop-off</th>
-              <th className="p-4 border-b font-medium">Date & Time</th>
-              <th className="p-4 border-b font-medium">amount</th>
-              <th className="p-4 border-b font-medium">Payment Status</th>
-              <th className="p-4 border-b font-medium">Payment Type</th>
-              <th className="p-4 border-b font-medium">Status</th>
-              <th className="p-4 border-b font-medium">Actions</th>
+              <th className="border px-4 py-2">Customer Name</th>
+              <th className="border px-4 py-2">Phone</th>
+              <th className="border px-4 py-2">Car</th>
+              <th className="border px-4 py-2">Book Type</th>
+              <th className="border px-4 py-2">Pick-up</th>
+              <th className="border px-4 py-2">Drop-off</th>
+              <th className="border px-4 py-2">Date</th>
+              <th className="border px-4 py-2">Amount</th>
+              <th className="border px-4 py-2">Payment Status</th>
+              <th className="border px-4 py-2">Payment Type</th>
+              <th className="border px-4 py-2">Status</th>
+              <th className="border px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {bookings.map((booking, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="p-4 border-b">{index + 1}</td>
-                <td className="p-4 border-b">{booking.userName}</td>
-                <td className="p-4 border-b">{booking.phone}</td>
-                <td className="p-4 border-b">{booking.carName}</td>
-                <td className="p-4 border-b">{booking.bookType}</td>
-                <td className="p-4 border-b">{booking.departure}</td>
-                <td className="p-4 border-b">{booking.destination}</td>
-                <td className="p-4 border-b">
-                  {booking.bookingDate.toString()}
+              <tr
+                key={index}
+                className="max-lg:text-sm max-sm:text-xs hover:bg-gray-50 text-gray-700 font-medium"
+              >
+                <td className="border px-4 py-2">{index + 1}</td>
+                <td className="border px-4 py-2">{booking.userName}</td>
+                <td className="border px-4 py-2">{booking.phone}</td>
+                <td className="border px-4 py-2">{booking.carName}</td>
+                <td className="border px-4 py-2">
+                  {booking.bookType === "full_day" ? "Full day" : "Transfer"}
                 </td>
-                <td className="p-4 border-b">{booking.amount}</td>
-                <td className="p-4 border-b">{booking.paymentStatus}</td>
-                <td className="p-4 border-b">{booking.paymentType}</td>
-                <td className="p-4 border-b">
+                <td className="border px-4 py-2">
+                  {truncateByWords(booking.departure)}
+                </td>
+                <td className="border px-4 py-2">
+                  {truncateByWords(booking.destination)}
+                </td>
+                <td className="border px-4 py-2">
+                  {formatDateToLocal(booking.bookingDate.toString())}
+                </td>
+                <td className="border px-4 py-2">
+                  {formatCurrency(booking.amount)}
+                </td>
+                <td className="border px-4 py-2">
+                  {toSentenceCase(booking.paymentStatus)}
+                </td>
+                <td className="border px-4 py-2">
+                  {booking.paymentType === "full" ? "Full amount" : "Reserved"}
+                </td>
+                <td className="border px-4 py-2">
                   <span
                     className={`px-3 py-1 rounded-full text-sm ${getStatusClass(
                       booking.bookingStatus
@@ -119,13 +130,13 @@ const NotificationTable = ({ bookings }: { bookings: any }) => {
                     {booking.bookingStatus}
                   </span>
                 </td>
-                <td className="p-4 border-b">
+                <td className="border px-4 py-2">
                   <form action={formAction}>
                     <input type="hidden" name="viewed" defaultValue="true" />
                     <button
                       type="submit"
                       onClick={() => handleViewToggle(booking.id)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded-lg"
+                      className="bg-secondaryColor hover:bg-cyan-600 text-white px-3 py-1 rounded-lg"
                     >
                       {showDetails && selectedBooking.id === booking.id
                         ? "Hide"
