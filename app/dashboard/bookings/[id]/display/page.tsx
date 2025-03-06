@@ -14,6 +14,8 @@ const Page = async ({ params }: { params: Params }) => {
     car = await getCarById(booking?.carId);
   }
 
+  console.log(booking);
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
@@ -80,9 +82,23 @@ const Page = async ({ params }: { params: Params }) => {
                 </div>
               </div>
               <div className="p-6 mt-12">
-                <p className="text-gray-700 mb-6 line-clamp-3">
+                <p className="text-gray-700 mb-6 line-clamp-2">
                   {car.description}
                 </p>
+                <div>
+                  <div className="flex flex-wrap gap-2 border-t border-gray-300 p-2">
+                    {booking?.addons.map((addon, index) => (
+                      <span
+                        key={index}
+                        className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full"
+                      >
+                        {addon?.addonName
+                          ? addon.addonName
+                          : "No addons selected"}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}

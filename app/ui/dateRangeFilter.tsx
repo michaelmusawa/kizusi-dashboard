@@ -77,19 +77,19 @@ const DateRangeFilter = ({
         <input
           type="date"
           id="startDate"
-          className="block w-full rounded-md border border-gray-200 py-[9px] text-sm placeholder:text-gray-500"
+          className="block w-full rounded-md border border-gray-200 py-[9px] text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           placeholder={placeholderStart}
           value={startDate}
           onChange={handleStartDateChange}
         />
-        <p>{`→`}</p>
+        <p className="text-primaryColor">{`→`}</p>
         <label htmlFor="endDate" className="sr-only">
           End Date
         </label>
         <input
           type="date"
           id="endDate"
-          className="block w-full rounded-md border border-gray-200 py-[9px] text-sm placeholder:text-gray-500"
+          className="block w-full rounded-md border border-gray-200 py-[9px] text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           placeholder={placeholderEnd}
           value={endDate}
           onChange={handleEndDateChange}

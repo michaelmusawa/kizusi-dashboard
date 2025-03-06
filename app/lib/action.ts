@@ -964,6 +964,7 @@ export async function getBookingById(
       SELECT 
         b.*,  -- Select all columns from Booking table
         u.name AS "userName",
+        u.email,
         u.phone,
         c.id AS "carId",
         c.name AS "carName",
@@ -980,7 +981,7 @@ export async function getBookingById(
       LEFT JOIN "BookingAddon" ba ON b.id = ba."bookingId"
       LEFT JOIN "Addon" a ON ba."addonId" = a.id
       WHERE b.id = $1
-      GROUP BY b.id, u.name, u.phone, c.id, c.name
+      GROUP BY b.id, u.name, u.email, u.phone, c.id, c.name
       `,
       [bookingId]
     );
@@ -1136,83 +1137,68 @@ export async function updateBooking(
 
 export async function fetchCardData(startDate: string, endDate: string) {
   try {
-    // Base query for counting bookings
-    let baseQuery = `
-      SELECT 
-        COUNT(*) 
-      FROM "Booking" 
-      WHERE "paymentStatus" = $1
+    // Query for counting users (clients)
+    let usersQuery = `
+      SELECT COUNT(*) 
+      FROM "User"
+      WHERE 1=1
     `;
-    const queryParams: string[] = ["CONFIRMED"];
-
-    // Add date range filter if both startDate and endDate are provided
+    const usersQueryParams: string[] = [];
     if (startDate && endDate) {
-      baseQuery += ` AND "createdAt" BETWEEN $2 AND $3`;
-      queryParams.push(startDate, endDate); // Add the date parameters
+      usersQuery += ` AND "createdAt" BETWEEN $${
+        usersQueryParams.length + 1
+      } AND $${usersQueryParams.length + 2}`;
+      usersQueryParams.push(startDate, endDate);
     } else if (startDate) {
-      baseQuery += ` AND "createdAt" >= $2`;
-      queryParams.push(startDate); // Add the startDate parameter
+      usersQuery += ` AND "createdAt" >= $${usersQueryParams.length + 1}`;
+      usersQueryParams.push(startDate);
     } else if (endDate) {
-      baseQuery += ` AND "createdAt" <= $2`;
-      queryParams.push(endDate); // Add the endDate parameter
+      usersQuery += ` AND "createdAt" <= $${usersQueryParams.length + 1}`;
+      usersQueryParams.push(endDate);
     }
+    const clientsCountPromise = pool.query(usersQuery, usersQueryParams);
 
-    // Count the confirmed bookings
-    const paidBookingCountPromise = pool.query(baseQuery, queryParams);
-
-    // Reset queryParams for reserved bookings
-    const reservedQueryParams = ["reserve"];
-    let cancelledBookingCountPromise;
-
-    // Modify base query for reserved bookings with date filters
+    // Query for counting reserved bookings
+    let reservedQuery = `
+      SELECT COUNT(*) 
+      FROM "Booking"
+      WHERE "bookType" = $1
+    `;
+    const reservedQueryParams: string[] = ["reserve"];
     if (startDate && endDate) {
-      cancelledBookingCountPromise = pool.query(
-        baseQuery.replace(
-          '"bookType" = $1',
-          '"bookType" = $1 AND "createdAt" BETWEEN $2 AND $3'
-        ),
-        ["reserve", startDate, endDate]
-      );
+      reservedQuery += ` AND "createdAt" BETWEEN $2 AND $3`;
+      reservedQueryParams.push(startDate, endDate);
     } else if (startDate) {
-      cancelledBookingCountPromise = pool.query(
-        baseQuery.replace(
-          '"bookType" = $1',
-          '"bookType" = $1 AND "createdAt" >= $2'
-        ),
-        ["reserve", startDate]
-      );
+      reservedQuery += ` AND "createdAt" >= $2`;
+      reservedQueryParams.push(startDate);
     } else if (endDate) {
-      cancelledBookingCountPromise = pool.query(
-        baseQuery.replace(
-          '"bookType" = $1',
-          '"bookType" = $1 AND "createdAt" >= $2'
-        ),
-        ["reserve", endDate]
-      );
-    } else {
-      cancelledBookingCountPromise = pool.query(baseQuery, ["reserve"]);
+      reservedQuery += ` AND "createdAt" <= $2`;
+      reservedQueryParams.push(endDate);
     }
+    const reservedBookingCountPromise = pool.query(
+      reservedQuery,
+      reservedQueryParams
+    );
 
-    // Sum the transactions for confirmed and cancelled bookings
+    // Query for summing transactions for bookings
     let transactionsStatusQuery = `
       SELECT
         SUM(CASE WHEN "paymentType" = 'reserve' THEN amount ELSE 0 END) AS "paid",
-        SUM(CASE WHEN "paymentType" = 'full' THEN amount ELSE 0 END) AS "cancelled"
+        SUM(CASE WHEN "paymentType" = 'full' THEN amount ELSE 0 END) AS "reserved"
       FROM "Booking"
+      WHERE 1=1
     `;
     const transactionsQueryParams: string[] = [];
-
     if (startDate && endDate) {
+      transactionsStatusQuery += ` AND "createdAt" BETWEEN $1 AND $2`;
       transactionsQueryParams.push(startDate, endDate);
-      transactionsStatusQuery += ` WHERE "createdAt" BETWEEN $1 AND $2`;
     } else if (startDate) {
+      transactionsStatusQuery += ` AND "createdAt" >= $1`;
       transactionsQueryParams.push(startDate);
-      transactionsStatusQuery += ` WHERE "createdAt" >= $1`;
     } else if (endDate) {
+      transactionsStatusQuery += ` AND "createdAt" <= $1`;
       transactionsQueryParams.push(endDate);
-      transactionsStatusQuery += ` WHERE "createdAt" <= $1`;
     }
-
     const transactionsStatusPromise = pool.query(
       transactionsStatusQuery,
       transactionsQueryParams
@@ -1220,25 +1206,25 @@ export async function fetchCardData(startDate: string, endDate: string) {
 
     // Wait for all queries to finish
     const data = await Promise.all([
-      paidBookingCountPromise,
-      cancelledBookingCountPromise,
+      clientsCountPromise,
+      reservedBookingCountPromise,
       transactionsStatusPromise,
     ]);
 
     // Extract the results from the database queries
-    const numberOfPaidBooking = Number(data[0].rows[0].count ?? "0");
-    const numberOfCancelledBooking = Number(data[1].rows[0].count ?? "0");
+    const numberOfClients = Number(data[0].rows[0].count ?? "0");
+    const numberOfReservedBooking = Number(data[1].rows[0].count ?? "0");
     const totalPaidBookings = formatCurrency(data[2].rows[0].paid ?? "0");
-    const totalCancelledBookings = formatCurrency(
-      data[2].rows[0].cancelled ?? "0"
+    const totalReservedBookings = formatCurrency(
+      data[2].rows[0].reserved ?? "0"
     );
 
     // Return the aggregated results
     return {
-      numberOfPaidBooking,
-      numberOfCancelledBooking,
+      numberOfClients,
+      numberOfReservedBooking,
       totalPaidBookings,
-      totalCancelledBookings,
+      totalReservedBookings,
     };
   } catch (error) {
     console.error("Database Error:", error);

@@ -10,7 +10,7 @@ const CarDisplay = ({ car }: { car: CarState }) => {
           href="/dashboard/cars"
           className="text-secondaryColor hover:underline mb-4 inline-block"
         >
-          &larr; Back to Cars
+          <span className="text-primaryColor">&larr;</span> Back to Cars
         </Link>
         <Link
           href={`/dashboard/cars/${car.id}/edit`}

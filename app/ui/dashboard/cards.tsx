@@ -20,20 +20,18 @@ export default async function CardWrapper({
   endDate: string;
 }) {
   const {
-    numberOfPaidBooking,
-    numberOfCancelledBooking,
+    numberOfClients,
+    numberOfReservedBooking,
     totalPaidBookings,
-    totalCancelledBookings,
+    totalReservedBookings,
   } = await fetchCardData(startDate, endDate);
-
-  console.log("card data", numberOfCancelledBooking);
 
   return (
     <>
-      <Card title="Clients" value={numberOfPaidBooking} type="collected" />
+      <Card title="Clients" value={numberOfClients} type="collected" />
       <Card
         title="Reservations"
-        value={numberOfCancelledBooking}
+        value={numberOfReservedBooking}
         type="pending"
       />
       <Card
@@ -43,7 +41,7 @@ export default async function CardWrapper({
       />
       <Card
         title="Total paid amount"
-        value={totalCancelledBookings}
+        value={totalReservedBookings}
         type="customers"
       />
     </>

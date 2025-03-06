@@ -39,6 +39,11 @@ export default function NavLinks({ notify }: { notify: number }) {
       {links.map((link) => {
         const LinkIcon = link.icon;
 
+        const isActive =
+          link.href === "/dashboard"
+            ? pathname === "/dashboard"
+            : pathname.includes(link.href);
+
         const isNotificationLink = link.name === "Notifications";
         const notificationTextClass =
           notify > 0 && link.name === "Notifications"
@@ -49,11 +54,10 @@ export default function NavLinks({ notify }: { notify: number }) {
           <Link
             key={link.name}
             href={link.href}
+            // prettier-ignore
             className={clsx(
               "flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium hover:bg-[rgba(88,184,201,0.15)] hover:text-primaryColor md:flex-none md:justify-start md:p-2 md:px-3",
-              pathname === "/dashboard"
-                ? "bg-[rgba(88,184,201,0.2)] text-primaryColor"
-                : pathname.includes(link.href) && link.href !== "/dashboard"
+              isActive
                 ? "bg-[rgba(88,184,201,0.2)] text-primaryColor"
                 : "bg-gray-50"
             )}

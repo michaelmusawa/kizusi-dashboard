@@ -18,53 +18,58 @@ export default async function LatestBookings({
         Latest Bookings
       </h2>
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 p-4">
-        <div className="bg-white px-6">
-          {latestBookings.map((booking, i) => {
-            return (
-              <div
-                key={booking.id}
-                className={clsx(
-                  "flex flex-row items-center justify-between py-4",
-                  {
-                    "border-t": i !== 0,
-                  }
-                )}
-              >
-                <div className="flex items-center">
-                  <Image
-                    src={booking.imageUrl}
-                    alt={`${booking.carName}'s profile picture`}
-                    className="mr-4 rounded-2xl w-20 h-12"
-                    width={5000}
-                    height={4000}
-                  />
+        {latestBookings.length === 0 ? (
+          <p className="mt-4 text-gray-400">No data available.</p>
+        ) : (
+          <div className="bg-white px-6">
+            {latestBookings.map((booking, i) => {
+              return (
+                <div
+                  key={booking.id}
+                  className={clsx(
+                    "flex flex-row items-center justify-between py-4",
+                    {
+                      "border-t": i !== 0,
+                    }
+                  )}
+                >
+                  <div className="flex items-center">
+                    <Image
+                      src={booking.imageUrl}
+                      alt={`${booking.carName}'s profile picture`}
+                      className="mr-4 rounded-2xl w-20 h-12"
+                      width={5000}
+                      height={4000}
+                    />
 
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold md:text-base">
+                        {booking.carName}
+                      </p>
+                      <p className="hidden text-sm text-gray-500 sm:block">
+                        {booking.categoryName}
+                      </p>
+                    </div>
+                  </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold md:text-base">
-                      {booking.carName}
+                      {booking.userName}
                     </p>
                     <p className="hidden text-sm text-gray-500 sm:block">
-                      {booking.categoryName}
+                      {booking.email}
                     </p>
                   </div>
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold md:text-base">
-                    {booking.userName}
-                  </p>
-                  <p className="hidden text-sm text-gray-500 sm:block">
-                    {booking.email}
+                  <p
+                    className={`${lusitana.className} truncate text-sm font-medium md:text-base`}
+                  >
+                    {booking.amount}
                   </p>
                 </div>
-                <p
-                  className={`${lusitana.className} truncate text-sm font-medium md:text-base`}
-                >
-                  {booking.amount}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
+
         <div className="flex items-center pb-2 pt-6">
           <ArrowPathIcon className="h-5 w-5 text-gray-500" />
           <h3 className="ml-2 text-sm text-gray-500 ">Updated just now</h3>

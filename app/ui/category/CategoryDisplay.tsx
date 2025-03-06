@@ -11,7 +11,7 @@ const CategoryDisplay = ({ category }: { category: CategoryState }) => {
           href="/dashboard/categories"
           className="text-secondaryColor hover:underline mb-4 inline-block"
         >
-          &larr; Back to Categories
+          <span className="text-primaryColor">&larr;</span> Back to Categories
         </Link>
         <Link
           href={`/dashboard/categories/${category.categoryId}/edit`}

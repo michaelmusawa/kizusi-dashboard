@@ -99,7 +99,7 @@ const BookingDetails = ({ booking }: { booking: BookingState }) => {
           &larr; Back to bookings
         </Link>
         <Link
-          href={`/dashboard/transactions?query=${booking.id}`}
+          href={`/dashboard/transactions?query=${booking.id}&&source=booking_details`}
           className="text-secondaryColor hover:underline mb-4 inline-block"
         >
           View transactions
