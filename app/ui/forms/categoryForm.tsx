@@ -2,18 +2,14 @@ import { CategoryState } from "@/app/lib/definitions";
 import { useState } from "react";
 import Cancel from "../icons/Cancel";
 
-const CategoryForm: React.FC<{ category?: CategoryState }> = ({ category }) => {
-  const [brands, setBrands] = useState<string[]>(
+const CategoryForm: React.FC<{ category?: CategoryState | null }> = ({
+  category,
+}) => {
+  const [brands, setBrands] = useState<{ brand: string }[]>(
     category?.brands ? category.brands.map((b) => ({ brand: b.brandName })) : []
   );
 
-  const [existingBrands, setExistingBrands] = useState<string[]>([
-    "Toyota",
-    "Honda",
-    "Tesla",
-    "BMW",
-    "Benz",
-  ]);
+  const existingBrands = ["Toyota", "Honda", "Tesla", "BMW", "Benz"];
 
   const handleAddBrand = () => {
     setBrands([...brands, { brand: "" }]);

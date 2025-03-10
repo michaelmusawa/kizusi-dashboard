@@ -4,7 +4,7 @@ import { CarState } from "@/app/lib/definitions";
 
 const CarDisplay = ({ car }: { car: CarState }) => {
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-2 lg:p-4">
       <div className="flex justify-between">
         <Link
           href="/dashboard/cars"
@@ -21,6 +21,9 @@ const CarDisplay = ({ car }: { car: CarState }) => {
       </div>
 
       <div className="relative rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300 ease-in-out">
+        <div className="absolute top-4 right-4 z-10 bg-[rgba(88,184,201,0.6)] backdrop-blur-sm text-lg font-semibold text-gray-100 px-3 py-1 rounded-full">
+          {car.category.categoryName}
+        </div>
         <div className="relative">
           <Image
             src={car.image}

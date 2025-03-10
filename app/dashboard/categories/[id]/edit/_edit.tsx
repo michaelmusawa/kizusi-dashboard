@@ -5,7 +5,6 @@ import { CarActionState, CategoryState } from "@/app/lib/definitions";
 import { ConfirmModal } from "@/app/ui/confirmationModal";
 import CategoryForm from "@/app/ui/forms/categoryForm";
 import ArrowRightIcon from "@/app/ui/icons/arrowRight";
-import { useRouter } from "next/navigation";
 import React, { useActionState, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -13,7 +12,7 @@ const EditCategory = ({
   category,
   id,
 }: {
-  category: CategoryState;
+  category: CategoryState | null;
   id: number;
 }) => {
   const initialState: CarActionState = {
@@ -38,16 +37,16 @@ const EditCategory = ({
   }
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const router = useRouter();
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     try {
-      await deleteCategory(id);
-      console.log("Item deleted!");
+      const deleted = await deleteCategory(id);
+      if (deleted) {
+        console.log("Category deleted successfully");
+      }
       setIsModalVisible(false);
-      router.replace("/dashboard/categories");
     } catch (error) {
-      console.error("Error deleting car:", error);
+      console.error("Error deleting category:", error);
     }
   };
 
@@ -96,10 +95,10 @@ const EditCategory = ({
   return (
     <>
       <div className="flex justify-between">
-        <h1 className="text-2xl font-bold mb-6">Edit category</h1>
+        <h1 className="text-lg md:text-2xl font-bold">Edit category</h1>
         <button
           onClick={() => setIsModalVisible(true)}
-          className="p-2 bg-[rgba(88,184,201,0.8)] text-white rounded-lg hover:bg-[rgba(88,184,201)]"
+          className="p-2 text-red-400 hover:text-red-600 text-sm md:text-lg"
         >
           Delete Category
         </button>

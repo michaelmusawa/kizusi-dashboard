@@ -77,7 +77,7 @@ const DateRangeFilter = ({
         <input
           type="date"
           id="startDate"
-          className="block w-full rounded-md border border-gray-200 py-[9px] text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
+          className="block w-full rounded-md border border-gray-200 py-[9px] text-xs md:text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           placeholder={placeholderStart}
           value={startDate}
           onChange={handleStartDateChange}
@@ -89,13 +89,13 @@ const DateRangeFilter = ({
         <input
           type="date"
           id="endDate"
-          className="block w-full rounded-md border border-gray-200 py-[9px] text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
+          className="block w-full rounded-md border border-gray-200 py-[9px] text-xs md:text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           placeholder={placeholderEnd}
           value={endDate}
           onChange={handleEndDateChange}
         />
       </div>
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      {error && <p className="text-red-500 text-xs md:text-sm mt-1">{error}</p>}
     </div>
   );
 };

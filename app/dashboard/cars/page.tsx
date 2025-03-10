@@ -12,18 +12,26 @@ const Page = async (props: {
     query?: string;
     page?: string;
     success?: boolean;
+    deleted?: boolean;
   }>;
 }) => {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
   const success = searchParams?.success;
+  const deleted = searchParams?.deleted;
   const totalPages = await fetchCarPages(query);
   return (
-    <main className="min-h-full bg-gray-100 p-6 relative">
+    <main className="min-h-full bg-gray-100 p-3 lg:p-6 relative">
       <div className="bg-white shadow-md rounded-lg px-4 pt-4 pb-14 min-h-full">
         <div aria-live="polite" aria-atomic="true">
           {success && <SuccessMessage message="Car updated successfully." />}
+          {deleted && (
+            <SuccessMessage
+              deleted={true}
+              message="Car deleted successfully."
+            />
+          )}
         </div>
         <div className="flex justify-between items-center mb-6 gap-4">
           <Link href="/dashboard/cars/create">

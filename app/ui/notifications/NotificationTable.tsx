@@ -5,7 +5,7 @@ import BookingDetails from "../Bookings/BookingDetails";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { updateBooking } from "@/app/lib/action";
-import { BookingActionState } from "@/app/lib/definitions";
+import { BookingActionState, BookingState } from "@/app/lib/definitions";
 import {
   formatCurrency,
   formatDateToLocal,
@@ -14,8 +14,10 @@ import {
   truncateByWords,
 } from "@/app/lib/utils";
 
-const NotificationTable = ({ bookings }: { bookings: any }) => {
-  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+const NotificationTable = ({ bookings }: { bookings: BookingState[] }) => {
+  const [selectedBooking, setSelectedBooking] = useState<
+    BookingState | null | undefined
+  >(null);
   const [showDetails, setShowDetails] = useState(false);
 
   const initialState: BookingActionState = {
@@ -51,17 +53,15 @@ const NotificationTable = ({ bookings }: { bookings: any }) => {
   }
 
   return (
-    <div className="mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Notifications</h1>
-
+    <div className="mx-auto p-3 md:p-6">
       {/* Booking Details Preview */}
       {showDetails && selectedBooking && (
-        <div className="mb-8">
-          <BookingDetails booking={selectedBooking} />
+        <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-3 md:p-6 mb-6">
+          <BookingDetails booking={selectedBooking} actionButtons={false} />
           <Link href={`/dashboard/bookings/${selectedBooking.id}/display`}>
             <button
               onClick={() => setShowDetails(false)}
-              className="mt-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+              className="text-xs md:text-lg mt-4 px-4 py-2 bg-secondaryColor font-bold text-primaryColor rounded hover:bg-cyan-500"
             >
               View booking
             </button>
@@ -98,7 +98,7 @@ const NotificationTable = ({ bookings }: { bookings: any }) => {
               >
                 <td className="border px-4 py-2">{index + 1}</td>
                 <td className="border px-4 py-2">{booking.userName}</td>
-                <td className="border px-4 py-2">{booking.phone}</td>
+                <td className="border px-4 py-2">{booking.userPhone}</td>
                 <td className="border px-4 py-2">{booking.carName}</td>
                 <td className="border px-4 py-2">
                   {booking.bookType === "full_day" ? "Full day" : "Transfer"}
@@ -134,11 +134,15 @@ const NotificationTable = ({ bookings }: { bookings: any }) => {
                   <form action={formAction}>
                     <input type="hidden" name="viewed" defaultValue="true" />
                     <button
-                      type="submit"
+                      type={
+                        showDetails && selectedBooking?.id === booking.id
+                          ? "button"
+                          : "submit"
+                      }
                       onClick={() => handleViewToggle(booking.id)}
                       className="bg-secondaryColor hover:bg-cyan-600 text-white px-3 py-1 rounded-lg"
                     >
-                      {showDetails && selectedBooking.id === booking.id
+                      {showDetails && selectedBooking?.id === booking.id
                         ? "Hide"
                         : "View"}
                     </button>

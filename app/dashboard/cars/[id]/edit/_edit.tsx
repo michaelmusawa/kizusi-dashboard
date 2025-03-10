@@ -5,7 +5,6 @@ import { CarActionState, CarState, CategoryState } from "@/app/lib/definitions";
 import { ConfirmModal } from "@/app/ui/confirmationModal";
 import CarForm from "@/app/ui/forms/carForm";
 import ArrowRightIcon from "@/app/ui/icons/arrowRight";
-import { useRouter } from "next/navigation";
 import React, { useActionState, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -40,14 +39,14 @@ const EditCar = ({
   }
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const router = useRouter();
 
   const handleDelete = async (id: number) => {
     try {
-      await deleteCar(id);
-      console.log("Item deleted!");
+      const deleted = await deleteCar(id);
+      if (deleted) {
+        console.log("Car deleted successfully");
+      }
       setIsModalVisible(false);
-      router.replace("/dashboard/cars");
     } catch (error) {
       console.error("Error deleting car:", error);
     }
@@ -98,10 +97,10 @@ const EditCar = ({
   return (
     <>
       <div className="flex justify-between">
-        <h1 className="text-2xl font-bold mb-6">Edit car</h1>
+        <h1 className="text-lg lg:text-2xl font-bold mb-6">Edit car</h1>
         <button
           onClick={() => setIsModalVisible(true)}
-          className="p-2 bg-[rgba(88,184,201,0.8)] text-white rounded-lg hover:bg-[rgba(88,184,201)]"
+          className="p-2 text-red-400 hover:text-red-600"
         >
           Delete Car
         </button>

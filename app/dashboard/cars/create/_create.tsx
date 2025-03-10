@@ -5,7 +5,6 @@ import { CarActionState, CategoryState } from "@/app/lib/definitions";
 import CarForm from "@/app/ui/forms/carForm";
 import ArrowRightIcon from "@/app/ui/icons/arrowRight";
 import Link from "next/link";
-import router from "next/router";
 import { useActionState, useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -27,15 +26,11 @@ const CreateCar = ({ categories }: { categories: CategoryState[] }) => {
         toast.error(state.message, { id: "error" });
       } else {
         toast.success(state.message, { id: "success" });
-        const timer = setTimeout(() => {
-          router.push("/dashboard/cars/create");
-        }, 3000);
-        return () => clearTimeout(timer);
       }
     } else if (state.state_error) {
       toast.error(state.state_error, { id: "state_error" });
     }
-  }, [state, router]);
+  }, [state]);
 
   function SubmitButton() {
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -76,9 +71,9 @@ const CreateCar = ({ categories }: { categories: CategoryState[] }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-6">Add New Car</h1>
+    <div className="min-h-screen bg-gray-100 p-2 lg:p-6">
+      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-2 lg:p-6">
+        <h1 className="text-lg lg:text-2xl font-bold mb-6">Add New Car</h1>
         <form action={formAction}>
           <CarForm categories={categories} />
           <div className="flex gap-4">

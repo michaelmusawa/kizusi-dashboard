@@ -25,7 +25,7 @@ export default async function LatestBookings({
             {latestBookings.map((booking, i) => {
               return (
                 <div
-                  key={booking.id}
+                  key={i}
                   className={clsx(
                     "flex flex-row items-center justify-between py-4",
                     {

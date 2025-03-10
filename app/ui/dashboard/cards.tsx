@@ -1,15 +1,14 @@
 import MoneyIcon from "../icons/moneyIcon";
 import UserGroupIcon from "../icons/UserGroupIcon";
 import Clock from "../icons/Clock";
-import Inbox from "../icons/Inbox";
 import { lusitana } from "@/app/fonts/fonts";
 import { fetchCardData } from "@/app/lib/action";
 
 const iconMap = {
   collected: UserGroupIcon,
-  customers: UserGroupIcon,
+  customers: MoneyIcon,
   pending: Clock,
-  invoices: Inbox,
+  invoices: MoneyIcon,
 };
 
 export default async function CardWrapper({

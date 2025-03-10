@@ -14,7 +14,7 @@ const CarCard: FC<CarState> = ({
 }) => {
   return (
     <div className="relative rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition duration-300 ease-in-out">
-      <div className="absolute top-4 right-4 z-10 bg-[rgba(88,184,201,0.4)] bg-opacity-30 backdrop-blur-sm text-xs font-semibold text-gray-800 px-3 py-1 rounded-full">
+      <div className="absolute top-4 right-4 z-10 bg-[rgba(88,184,201,0.6)] backdrop-blur-sm text-xs font-semibold text-gray-100 px-3 py-1 rounded-full">
         {category.categoryName}
       </div>
 
@@ -88,9 +88,9 @@ const CarCard: FC<CarState> = ({
 };
 
 const CategoryCard: FC<CategoryState> = ({
-  name,
+  categoryName,
   price,
-  image,
+  imageUrl,
   brands,
   description,
 }) => {
@@ -98,8 +98,8 @@ const CategoryCard: FC<CategoryState> = ({
     <div className="relative rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition duration-300 ease-in-out">
       <div className="relative">
         <Image
-          src={image}
-          alt={`${name}`}
+          src={imageUrl}
+          alt={`${categoryName}`}
           width={2070}
           height={1380}
           className="w-full h-80 object-cover"
@@ -107,7 +107,7 @@ const CategoryCard: FC<CategoryState> = ({
 
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white to-transparent" />
         <div className="absolute inset-x-0 -bottom-12 p-4 flex flex-col items-center text-center">
-          <h5 className="text-lg font-bold text-gray-800">{name}</h5>
+          <h5 className="text-lg font-bold text-gray-800">{categoryName}</h5>
 
           <p className="text-sm font-semibold text-secondaryColor">
             Ksh. {price}/day

@@ -17,30 +17,42 @@ const CarForm: React.FC<{
       : []
   );
 
-  const [addons, setAddons] = useState<{ name: string; value: number }[]>(
+  const [addons, setAddons] = useState<
+    { name: string; value: number | string }[]
+  >(
     car?.addons
-      ? car.addons.map((f) => ({
-          name: f.addonName,
-          value: f.addonValue,
+      ? car.addons.map((a) => ({
+          name: a.addonName,
+          value: a.addonValue,
         }))
       : []
   );
 
-  const [category, setCategory] = useState<string>(car?.category.name ?? "");
+  const [category, setCategory] = useState<string>(
+    car?.category.categoryName ?? ""
+  );
   const [brand, setBrand] = useState<string>(car?.brand.brandName ?? "");
 
   const [brands, setBrands] = useState<string[]>([]);
   const [localCategories, setLocalCategories] = useState<string[]>(
-    () => categories?.map((c) => c.name) ?? []
+    () => categories?.map((c) => c.categoryName) ?? []
   );
 
   useEffect(() => {
+    if (categories) {
+      setLocalCategories(categories.map((c) => c.categoryName));
+    }
+  }, [categories]);
+
+  useEffect(() => {
     if (category) {
-      const selectedCategory = categories?.find((c) => c.name === category);
+      const selectedCategory = categories?.find(
+        (c) => c.categoryName === category
+      );
       if (selectedCategory) {
         setBrands(selectedCategory.brands.map((b) => b.brandName));
       } else {
-        setBrands([]); // Clear brands if no category is selected or found
+        setBrands([]);
       }
     }
   }, [category, categories]);
@@ -50,7 +62,7 @@ const CarForm: React.FC<{
   };
 
   const handleAddAddon = () => {
-    setAddons([...addons, { name: "", value: null }]);
+    setAddons([...addons, { name: "", value: "" }]);
   };
 
   const handleFeatureChange = (index: number, field: string, value: string) => {
@@ -97,7 +109,7 @@ const CarForm: React.FC<{
         <label className="block font-medium mb-2">Category</label>
         <select
           name="category"
-          defaultValue={car?.category.name ?? ""}
+          defaultValue={car?.category.categoryName ?? ""}
           onChange={(e) => setCategory(e.target.value)}
           className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           required
@@ -209,7 +221,7 @@ const CarForm: React.FC<{
               name="value"
               placeholder="Value"
               className="w-2/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
-              value={addon.value}
+              value={addon?.value}
               onChange={(e) =>
                 handleAddonChange(index, "value", e.target.value)
               }
@@ -234,47 +246,6 @@ const CarForm: React.FC<{
       </div>
 
       {/* End of addons  */}
-
-      {/* <div className="mb-4">
-        <label className="block font-medium mb-2">Addons</label>
-        <div className="flex space-x-4 mb-2">
-          <select
-            className="w-2/3 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onChange={(e) => {
-              if (e.target.value && !addons.includes(e.target.value)) {
-                handleAddAddon(e.target.value);
-              }
-            }}
-          >
-            <option value="">Select an Addon</option>
-            <option value="Bluetooth">Bluetooth</option>
-            <option value="WiFi">WiFi</option>
-            <option value="Water">Water</option>
-            <option value="Charger">Charger</option>
-            <option value="GPS">GPS</option>
-            <option value="Baby Seat">Baby Seat</option>
-            <option value="Roof Rack">Roof Rack</option>
-          </select>
-        </div>
-        <div className="flex flex-wrap space-x-2">
-          {addons.map((addon, index) => (
-            <span
-              key={index}
-              className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full flex items-center space-x-2"
-            >
-              <span>{addon}</span>
-              <input type="hidden" name="addon" value={addon} />
-              <button
-                type="button"
-                onClick={() => handleRemoveAddon(addon)}
-                className="text-red-500 ml-2"
-              >
-                &times;
-              </button>
-            </span>
-          ))}
-        </div>
-      </div> */}
 
       <div className="mb-4">
         <label className="block font-medium mb-2">Description</label>
@@ -310,12 +281,6 @@ const CarForm: React.FC<{
           className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-secondaryColor"
           required
         />
-        {/* <input
-          type="file"
-          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          accept="image/*"
-          required
-        /> */}
       </div>
     </>
   );

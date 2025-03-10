@@ -1,5 +1,5 @@
 import { fetchTransactionsPages } from "@/app/lib/action";
-import CarDisplaySkeleton from "@/app/ui/car/CarDisplaySkeleton";
+import BookingsTableSkeleton from "@/app/ui/Bookings/TableSkeleton";
 import DateRangeFilter from "@/app/ui/dateRangeFilter";
 import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";
@@ -25,15 +25,15 @@ const Page = async (props: {
   const totalPages = await fetchTransactionsPages(query);
 
   return (
-    <main className="min-h-full bg-gray-100 p-6 relative">
-      <div className="bg-white shadow-md rounded-lg p-4">
+    <main className="min-h-full bg-gray-100 p-3 md:p-6 relative">
+      <div className="bg-white shadow-md rounded-lg p-2 md:p-4">
         {searchParams?.source && (
           <Link
             href={`/dashboard/bookings/${query}/display`}
-            className="text-secondaryColor hover:underline mb-4 inline-block"
+            className="text-xs md:text-lg text-secondaryColor hover:underline mb-4 inline-block"
           >
-            <span className="text-primaryColor">&larr;</span> Back to booking
-            details
+            <span className="text-xs md:text-lg text-primaryColor">&larr;</span>{" "}
+            Back to booking details
           </Link>
         )}
 
@@ -45,7 +45,10 @@ const Page = async (props: {
           />
         </div>
 
-        <Suspense key={query + currentPage} fallback={<CarDisplaySkeleton />}>
+        <Suspense
+          key={query + currentPage}
+          fallback={<BookingsTableSkeleton />}
+        >
           <TransactionsTable
             query={query}
             startDate={startDate}

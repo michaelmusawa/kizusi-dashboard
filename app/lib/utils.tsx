@@ -45,8 +45,6 @@ export const formatCurrency = (amount: number) => {
 export const groupBookingsByCategory = (bookings: BookingData[]) => {
   const categoryTotals: Record<string, number> = {};
 
-  console.log(bookings);
-
   // Group by category and sum amounts
   bookings.forEach((booking) => {
     const amount = parseFloat(booking.amount);
@@ -56,8 +54,6 @@ export const groupBookingsByCategory = (bookings: BookingData[]) => {
     }
     categoryTotals[booking.categoryName] += amount;
   });
-
-  console.log(categoryTotals);
 
   // Convert to an array of objects with categoryName and categoryTotal
   return Object.entries(categoryTotals).map(
@@ -72,8 +68,6 @@ export const groupBookingsByCategory = (bookings: BookingData[]) => {
 export const generateYAxis = (bookings: BookingData[]) => {
   // Step 1: Group the data by categoryName
   const categoryTotals = groupBookingsByCategory(bookings);
-
-  console.log(categoryTotals);
 
   // Step 2: Find the highest revenue across all categories
   const highestRecord = Math.max(
@@ -146,6 +140,10 @@ export const getStatusClass = (status: string) => {
       return "text-red-500 bg-red-100";
     case "FAILED":
       return "text-red-500 bg-red-100";
+    case "CANCELLED":
+      return "text-red-500 bg-red-100";
+    case "REFUNDED":
+      return "text-yellow-500 bg-yellow-100";
     default:
       return "";
   }

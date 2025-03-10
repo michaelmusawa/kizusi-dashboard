@@ -25,7 +25,9 @@ export default async function Page(props: {
       <div
         className={`flex justify-between items-center bg-gradient-to-r from-secondaryColor to-primaryColor p-3 rounded-lg shadow-md mb-4`}
       >
-        <h1 className={`${lusitana.className} text-2xl font-bold text-white`}>
+        <h1
+          className={`${lusitana.className} text-lg lg:text-2xl font-bold text-white`}
+        >
           Dashboard
         </h1>
         <DateRangeFilter

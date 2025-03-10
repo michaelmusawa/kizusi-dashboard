@@ -54,7 +54,6 @@ export default function NavLinks({ notify }: { notify: number }) {
           <Link
             key={link.name}
             href={link.href}
-            // prettier-ignore
             className={clsx(
               "flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium hover:bg-[rgba(88,184,201,0.15)] hover:text-primaryColor md:flex-none md:justify-start md:p-2 md:px-3",
               isActive
@@ -64,7 +63,8 @@ export default function NavLinks({ notify }: { notify: number }) {
           >
             <LinkIcon
               className={clsx("w-6", {
-                "animate-shake": isNotificationLink && notify > 0,
+                "animate-shake text-secondaryColor":
+                  isNotificationLink && notify > 0,
               })}
             />
             <p className={clsx("hidden md:block", notificationTextClass)}>

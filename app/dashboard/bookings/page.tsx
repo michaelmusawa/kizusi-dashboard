@@ -1,6 +1,6 @@
 import { fetchBookingsPages } from "@/app/lib/action";
+import BookingsTableSkeleton from "@/app/ui/Bookings/TableSkeleton";
 import BookingsTable from "@/app/ui/BookingsTable";
-import CarDisplaySkeleton from "@/app/ui/car/CarDisplaySkeleton";
 import DateRangeFilter from "@/app/ui/dateRangeFilter";
 import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";
@@ -23,8 +23,8 @@ const Page = async (props: {
   const totalPages = await fetchBookingsPages(query);
 
   return (
-    <main className="min-h-full bg-gray-100 p-6 relative">
-      <div className="bg-white shadow-md rounded-lg p-4">
+    <main className="min-h-full bg-gray-100 p-3 md:p-6 relative">
+      <div className="bg-white shadow-md rounded-lg p-2 md:p-4">
         <div className="flex justify-between items-center mb-6">
           <Search placeholder="Search here..." />
           <DateRangeFilter
@@ -33,7 +33,10 @@ const Page = async (props: {
           />
         </div>
 
-        <Suspense key={query + currentPage} fallback={<CarDisplaySkeleton />}>
+        <Suspense
+          key={query + currentPage}
+          fallback={<BookingsTableSkeleton />}
+        >
           <BookingsTable
             query={query}
             startDate={startDate}

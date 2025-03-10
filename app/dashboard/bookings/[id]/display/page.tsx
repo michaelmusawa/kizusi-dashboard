@@ -1,11 +1,20 @@
 import { getBookingById, getCarById } from "@/app/lib/action";
 import BookingDetails from "@/app/ui/Bookings/BookingDetails";
+import SuccessMessage from "@/app/ui/messageModal";
 import Image from "next/image";
 
-type Params = { id: string };
-
-const Page = async ({ params }: { params: Params }) => {
-  const { id } = await params;
+const Page = async (props: {
+  searchParams?: Promise<{
+    success?: boolean;
+  }>;
+  params?: Promise<{
+    id?: string;
+  }>;
+}) => {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+  const id = params?.id || "";
+  const success = searchParams?.success;
 
   const booking = await getBookingById(id);
   let car;
@@ -14,11 +23,12 @@ const Page = async ({ params }: { params: Params }) => {
     car = await getCarById(booking?.carId);
   }
 
-  console.log(booking);
-
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
+    <div className="min-h-screen bg-gray-100 p-3 md:p-6">
+      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-3 md:p-6">
+        <div aria-live="polite" aria-atomic="true">
+          {success && <SuccessMessage message="Status updated successfully." />}
+        </div>
         <BookingDetails booking={booking} />
 
         <div className="flex w-full border-t border-gray-300 mb-8"></div>
@@ -29,7 +39,7 @@ const Page = async ({ params }: { params: Params }) => {
             <div className="flex items-center gap-6">
               <div>
                 <Image
-                  src={booking?.user?.image ?? "/images/profile.png"}
+                  src={booking?.userImage ?? "/images/profile.png"}
                   alt="User"
                   width={80}
                   height={80}
@@ -38,17 +48,17 @@ const Page = async ({ params }: { params: Params }) => {
               </div>
               <div className="flex">
                 <div className="space-y-3">
-                  <p className="text-lg text-gray-700">
+                  <p className="text-xs md:text-lg text-gray-700">
                     <span className="font-semibold">Name:</span>{" "}
                     {booking?.userName}
                   </p>
-                  <p className="text-lg text-gray-700">
+                  <p className="text-xs md:text-lg text-gray-700">
                     <span className="font-semibold">Email:</span>{" "}
-                    {booking?.email}
+                    {booking?.userEmail}
                   </p>
-                  <p className="text-lg text-gray-700">
+                  <p className="text-xs md:text-lg text-gray-700">
                     <span className="font-semibold">Phone:</span>{" "}
-                    {booking?.phone}
+                    {booking?.userPhone}
                   </p>
                 </div>
               </div>
@@ -70,19 +80,19 @@ const Page = async ({ params }: { params: Params }) => {
                 <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent" />
 
                 <div className="absolute inset-x-0 -bottom-20 p-4 flex flex-col items-center text-center">
-                  <h2 className="text-2xl font-bold text-gray-800">
+                  <h2 className="text-lg md:text-2xl font-bold text-gray-800">
                     {car.name}
                   </h2>
                   <div className="bg-white/40 mt-2 mb-2 text-sm font-semibold text-gray-800 px-3 py-1 rounded-full inline-block">
                     {car.brand.brandName}
                   </div>
-                  <p className="text-lg font-semibold text-secondaryColor">
+                  <p className="text-md md:text-lg font-semibold text-secondaryColor">
                     Ksh. {car.price}/day
                   </p>
                 </div>
               </div>
               <div className="p-6 mt-12">
-                <p className="text-gray-700 mb-6 line-clamp-2">
+                <p className="text-xs md:text-lg text-gray-700 mb-6 line-clamp-2">
                   {car.description}
                 </p>
                 <div>

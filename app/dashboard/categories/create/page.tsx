@@ -5,7 +5,7 @@ import { CategoryActionState } from "@/app/lib/definitions";
 import CategoryForm from "@/app/ui/forms/categoryForm";
 import ArrowRightIcon from "@/app/ui/icons/arrowRight";
 import Link from "next/link";
-import React, { useActionState } from "react";
+import React, { useActionState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 const Page: React.FC = () => {
@@ -20,23 +20,17 @@ const Page: React.FC = () => {
     initialState
   );
 
-  if (state.message) {
-    if (state.errors) {
-      toast.error(state.message, {
-        id: "error",
-      });
-    } else {
-      toast.success(state.message, {
-        id: "success",
-      });
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+  useEffect(() => {
+    if (state.message) {
+      if (state.errors) {
+        toast.error(state.message, { id: "error" });
+      } else {
+        toast.success(state.message, { id: "success" });
+      }
+    } else if (state.state_error) {
+      toast.error(state.state_error, { id: "state_error" });
     }
-  } else if (state.state_error) {
-    toast.error(state.state_error, { id: "state_error" });
-  }
+  }, [state]);
 
   function SubmitButton() {
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -77,9 +71,9 @@ const Page: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-6">Add car category</h1>
+    <div className="min-h-screen bg-gray-100 p-3 md:p-6">
+      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-3 md:p-6">
+        <h1 className="text-lg md:text-2xl font-bold mb-6">Add car category</h1>
         <form action={formAction}>
           <CategoryForm />
 

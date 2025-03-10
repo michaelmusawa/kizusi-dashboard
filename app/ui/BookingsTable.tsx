@@ -57,7 +57,7 @@ const BookingsTable = async ({
             >
               <td className="border px-4 py-2">{index + 1}</td>
               <td className="border px-4 py-2">{booking.userName}</td>
-              <td className="border px-4 py-2">{booking.phone}</td>
+              <td className="border px-4 py-2">{booking.userPhone}</td>
               <td className="border px-4 py-2">{booking.carName}</td>
               <td className="border px-4 py-2">
                 {booking.bookType === "full_day" ? "Full day" : "Transfer"}
@@ -75,7 +75,13 @@ const BookingsTable = async ({
                 {formatCurrency(booking.amount)}
               </td>
               <td className="border px-4 py-2">
-                {toSentenceCase(booking.paymentStatus)}
+                <span
+                  className={`px-3 py-1 rounded-full text-sm ${getStatusClass(
+                    booking.paymentStatus
+                  )}`}
+                >
+                  {toSentenceCase(booking.paymentStatus)}
+                </span>
               </td>
               <td className="border px-4 py-2">
                 {booking.paymentType === "full" ? "Full amount" : "Reserved"}

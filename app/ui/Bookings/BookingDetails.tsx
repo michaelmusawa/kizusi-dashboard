@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useActionState, useEffect, useState } from "react";
-import Image from "next/image";
+import React, { useActionState, useState } from "react";
 import { BookingActionState, BookingState } from "@/app/lib/definitions";
 import toast from "react-hot-toast";
 import { updateBooking } from "@/app/lib/action";
@@ -13,8 +12,15 @@ import {
   getStatusClass,
 } from "@/app/lib/utils";
 import ArrowRightIcon from "../icons/arrowRight";
+import MapWithMarkers from "./Geoapify";
 
-const BookingDetails = ({ booking }: { booking: BookingState }) => {
+const BookingDetails = ({
+  booking,
+  actionButtons = true,
+}: {
+  booking: BookingState | null;
+  actionButtons?: boolean;
+}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const initialState: BookingActionState = {
@@ -23,7 +29,7 @@ const BookingDetails = ({ booking }: { booking: BookingState }) => {
     state_error: null,
   };
 
-  const updateBookingWithId = updateBooking.bind(null, booking.id);
+  const updateBookingWithId = updateBooking.bind(null, booking?.id ?? "");
   const [state, formAction, isPending] = useActionState(
     updateBookingWithId,
     initialState
@@ -33,18 +39,15 @@ const BookingDetails = ({ booking }: { booking: BookingState }) => {
     value: string;
   } | null>(null);
 
-  // Listen to state changes to show errors or messages.
-  useEffect(() => {
-    if (state.message) {
-      if (state.errors) {
-        toast.error(state.message, { id: "error" });
-      }
-      setIsModalVisible(false);
-    } else if (state.state_error) {
-      setIsModalVisible(false);
-      toast.error(state.state_error, { id: "state_error" });
+  if (state.message) {
+    if (state.errors) {
+      toast.error(state.message, {
+        id: "error",
+      });
     }
-  }, [state]);
+  } else if (state.state_error) {
+    toast.error(state.state_error, { id: "state_error" });
+  }
 
   const handleOnClick = (field: string, value: string) => {
     setModalAction({ field, value });
@@ -91,144 +94,147 @@ const BookingDetails = ({ booking }: { booking: BookingState }) => {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-between mb-6">
-        <Link
-          href="/dashboard/bookings"
-          className="text-secondaryColor hover:underline mb-4 inline-block"
-        >
-          &larr; Back to bookings
-        </Link>
-        <Link
-          href={`/dashboard/transactions?query=${booking.id}&&source=booking_details`}
-          className="text-secondaryColor hover:underline mb-4 inline-block"
-        >
-          View transactions
-        </Link>
-      </div>
+      {actionButtons && (
+        <div className="flex justify-between mb-6">
+          <Link
+            href="/dashboard/bookings"
+            className="text-xs md:text-lg text-secondaryColor hover:underline mb-4 inline-block"
+          >
+            <span className="text-primaryColor">&larr;</span> Back to bookings
+          </Link>
+          <Link
+            href={`/dashboard/transactions?query=${booking?.id}&&source=booking_details`}
+            className="text-xs md:text-lg text-secondaryColor hover:underline mb-4 inline-block"
+          >
+            View transactions
+          </Link>
+        </div>
+      )}
+
       {/* Booking Details Section */}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-4">
-          <p className="text-lg">
+          <p className="text-xs md:text-lg">
             <span className="font-semibold text-gray-700">Booking Type:</span>{" "}
-            {booking.bookType === "full_day" ? "Full day" : "Transfer"}
+            {booking?.bookType === "full_day" ? "Full day" : "Transfer"}
           </p>
-          <p className="text-lg">
+          <p className="text-xs md:text-lg">
             <span className="font-semibold text-gray-700">Departure:</span>{" "}
-            {booking.departure}
+            {booking?.departure}
           </p>
-          <p className="text-lg">
+          <p className="text-xs md:text-lg">
             <span className="font-semibold text-gray-700">Date:</span>{" "}
-            {formatDateToLocal(booking.bookingDate.toString())},{" "}
-            {formatTimeToLocal(booking.bookingDate.toString())}
+            {booking?.bookingDate &&
+              formatDateToLocal(booking.bookingDate.toString()) +
+                " " +
+                formatTimeToLocal(booking.bookingDate.toString())}
           </p>
-          {booking.bookType === "transfer" && (
+          {booking?.bookType === "transfer" && (
             <p className="text-lg">
               <span className="font-semibold text-gray-700">Destination:</span>{" "}
-              {booking.destination}
+              {booking?.destination}
             </p>
           )}
-          <p className="text-lg">
+          <p className="text-xs md:text-lg">
             <span className="font-semibold text-gray-700">Payment Type:</span>{" "}
-            {booking.paymentType === "full" ? "Full amount" : "Reserved"}
+            {booking?.paymentType === "full" ? "Full amount" : "Reserved"}
           </p>
-          <p className="text-lg">
+          <p className="text-xs md:text-lg">
             <span className="font-semibold text-gray-700">Payment Status:</span>{" "}
             <span
               className={`px-3 py-1 rounded-full text-sm ${getStatusClass(
-                booking.paymentStatus
+                booking?.paymentStatus ?? ""
               )}`}
             >
-              {booking.paymentStatus}
+              {booking?.paymentStatus}
             </span>
           </p>
-          <p className="text-lg">
+          <p className="text-xs md:text-lg">
             <span className="font-semibold text-gray-700">Booking Status:</span>{" "}
             <span
               className={`px-3 py-1 rounded-full text-sm ${getStatusClass(
-                booking.bookingStatus
+                booking?.bookingStatus ?? ""
               )}`}
             >
-              {booking.bookingStatus}
+              {booking?.bookingStatus}
             </span>
           </p>
-          <p className="text-lg">
+          <p className="text-xs md:text-lg">
             <span className="font-semibold text-gray-700">Amount:</span>{" "}
-            {formatCurrency(booking.amount)}
+            {formatCurrency(booking?.amount ?? 0)}
           </p>
         </div>
 
         {/* Map Section */}
         {booking && (
           <div className="rounded-xl overflow-hidden shadow-lg">
-            <Image
-              src={`https://maps.geoapify.com/v1/staticmap?style=osm-bright&width=600&height=400&center=lonlat:${
-                booking.destinationLongitude || booking.departureLongitude
-              },${
-                booking.destinationLatitude || booking.departureLatitude
-              }&zoom=14&marker=lonlat:${booking.departureLongitude},${
+            <MapWithMarkers
+              departureLongitude={
+                booking.departureLongitude
+                  ? parseFloat(booking.departureLongitude)
+                  : 0
+              }
+              departureLatitude={
                 booking.departureLatitude
-              }&icon=${encodeURIComponent(
-                "https://api.geoapify.com/v1/icon/?icon=location-pin&color=%23FF0000&size=medium&type=awesome&apiKey=YOUR_API_KEY"
-              )}${
-                booking.destinationLongitude && booking.destinationLatitude
-                  ? `&marker=lonlat:${booking.destinationLongitude},${
-                      booking.destinationLatitude
-                    }&icon=${encodeURIComponent(
-                      `https://api.geoapify.com/v1/icon/?icon=location-pin&color=%2300FF00&size=medium&type=awesome&apiKey=${process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY}`
-                    )}`
-                  : ""
-              }&path=lonlat:${booking.departureLongitude},${
-                booking.departureLatitude
-              }|lonlat:${booking.destinationLongitude},${
+                  ? parseFloat(booking.departureLatitude)
+                  : 0
+              }
+              destinationLongitude={
+                booking.destinationLongitude
+                  ? parseFloat(booking.destinationLongitude)
+                  : null
+              }
+              destinationLatitude={
                 booking.destinationLatitude
-              }&apiKey=${process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY}`}
-              alt="Route Map"
-              width={600}
-              height={400}
-              className="w-full h-full object-cover"
+                  ? parseFloat(booking.destinationLatitude)
+                  : null
+              }
             />
           </div>
         )}
       </div>
 
       {/* Action Buttons */}
-      <div className="flex flex-wrap gap-4 mt-8">
-        {booking.bookingStatus === "PENDING" ? (
-          <>
-            <button
-              onClick={() => handleOnClick("bookingStatus", "PROCEEDED")}
-              className="px-6 py-2 bg-secondaryColor text-white rounded-lg hover:bg-cyan-600 transition"
-            >
-              Proceeded
-            </button>
-            <button
-              onClick={() => handleOnClick("bookingStatus", "NO SHOW")}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-            >
-              No Show
-            </button>
-          </>
-        ) : (
-          booking.bookingStatus === "CANCELLED" && (
-            <button
-              onClick={() => handleOnClick("bookingStatus", "CANCELLED")}
-              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-            >
-              Mark as Refunded
-            </button>
-          )
-        )}
 
-        {booking.paymentStatus === "PENDING" && (
-          <button
-            onClick={() => handleOnClick("paymentStatus", "CONFIRMED")}
-            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-          >
-            Mark as Paid
-          </button>
-        )}
-      </div>
+      {actionButtons && (
+        <div className="flex flex-wrap gap-4 mt-8">
+          {booking?.bookingStatus === "PENDING" ? (
+            <>
+              <button
+                onClick={() => handleOnClick("bookingStatus", "PROCEEDED")}
+                className="text-xs md:text-lg px-6 py-2 bg-secondaryColor text-white rounded-lg hover:bg-cyan-600 transition"
+              >
+                Proceeded
+              </button>
+              <button
+                onClick={() => handleOnClick("bookingStatus", "NO SHOW")}
+                className="text-xs md:text-lg px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+              >
+                No Show
+              </button>
+            </>
+          ) : (
+            booking?.bookingStatus === "CANCELLED" && (
+              <button
+                onClick={() => handleOnClick("bookingStatus", "REFUNDED")}
+                className="text-xs md:text-lg px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+              >
+                Mark as Refunded
+              </button>
+            )
+          )}
+
+          {booking?.paymentStatus === "PENDING" && (
+            <button
+              onClick={() => handleOnClick("paymentStatus", "CONFIRMED")}
+              className="text-xs md:text-lg px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+            >
+              Mark as Paid
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Confirmation Modal */}
       {isModalVisible && modalAction && (
@@ -236,9 +242,13 @@ const BookingDetails = ({ booking }: { booking: BookingState }) => {
           <div className="bg-white p-8 rounded-2xl shadow-2xl w-11/12 max-w-md text-center">
             <h2 className="text-2xl font-bold mb-6">Confirm Update</h2>
             <p className="text-lg mb-6">
-              Are you sure you want to update the {modalAction.field} status to{" "}
-              <span className="font-semibold">{modalAction.value}</span>?
+              Are you sure you want to update the{" "}
+              {modalAction.field
+                .replace(/([a-z])([A-Z])/g, "$1 $2")
+                .toLowerCase()}{" "}
+              to <span className="font-semibold">{modalAction.value}</span>?
             </p>
+
             <div className="flex gap-4">
               <form action={formAction} className="flex-1">
                 <input type="hidden" name="viewed" defaultValue="true" />
@@ -251,7 +261,7 @@ const BookingDetails = ({ booking }: { booking: BookingState }) => {
               </form>
               <button
                 onClick={() => setIsModalVisible(false)}
-                className="flex-1 px-4 py-2!important bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                className="flex-1 items-center justify-center gap-2 mt-4 border border-gray-300 rounded-lg p-2 bg-gray-200 text-gray-700 hover:bg-gray-300"
               >
                 Back
               </button>

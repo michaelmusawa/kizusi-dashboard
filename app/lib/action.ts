@@ -198,7 +198,7 @@ export async function getCarById(id: number): Promise<CarState> {
         car."imageUrl" AS image,
         car.description,
         JSONB_BUILD_OBJECT('brandId', b.id, 'brandName', b.name) AS brand,
-        JSONB_BUILD_OBJECT('id', c.id, 'name', c.name) AS category,
+        JSONB_BUILD_OBJECT('id', c.id, 'categoryName', c.name) AS category,
         COALESCE(
           JSONB_AGG(
             DISTINCT JSONB_BUILD_OBJECT('featureId', f.id, 'featureName', f."featureName", 'featureValue', f."featureValue")
@@ -441,15 +441,12 @@ export async function deleteCar(id: number): Promise<boolean> {
     );
 
     if (result.rows.length > 0) {
-      console.log(
-        `Car with ID ${id} and related features and addons deleted successfully.`
-      );
       await client.query("COMMIT");
-      return true; // Return true if the car was deleted
+      redirect("/dashboard/cars?deleted=true");
     } else {
       console.log(`Car with ID ${id} not found.`);
       await client.query("ROLLBACK");
-      return false; // Return false if no car with the given ID was found
+      return false;
     }
   } catch (error) {
     console.error("Error deleting car by ID:", error);
@@ -533,7 +530,10 @@ export async function createCategory(
         [categoryId, brandId]
       );
     }
-    return { message: "Car created successfully" };
+
+    revalidatePath("/dashboard/categories/create");
+
+    return { message: "Category created successfully" };
   } catch (error) {
     console.error("Error:", error);
     return { state_error: "Error creating category" };
@@ -541,7 +541,7 @@ export async function createCategory(
 }
 export async function getCategoryById(
   categoryId: number
-): Promise<CategoryState> {
+): Promise<CategoryState | null> {
   try {
     const result = await pool.query(
       `
@@ -586,10 +586,10 @@ export async function fetchFilteredCategories(
     const result = await pool.query(
       `
       SELECT 
-        c.id, 
-        c.name,
+        c.id AS "categoryId", 
+        c.name AS "categoryName",
         c.price, 
-        c."imageUrl" AS image, 
+        c."imageUrl", 
         c.description, 
         ARRAY_AGG(
             JSON_BUILD_OBJECT('brandId', b.id, 'brandName', b.name)
@@ -633,7 +633,7 @@ export async function fetchCategoryPages(query: string) {
 }
 
 export async function updateCategory(
-  id: string,
+  id: number,
   prevState: CategoryActionState,
   formData: FormData
 ): Promise<CategoryActionState> {
@@ -724,32 +724,27 @@ export async function updateCategory(
   redirect("/dashboard/categories?success=true");
 }
 
-export async function deleteCategory(id: string): Promise<boolean> {
+export async function deleteCategory(id: number): Promise<boolean> {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    // Delete the associations between the category and brands
     await client.query(`DELETE FROM "CategoryBrand" WHERE "categoryId" = $1`, [
       id,
     ]);
-
-    // Delete the category itself
     const result = await client.query(
       `DELETE FROM "Category" WHERE id = $1 RETURNING id`,
       [id]
     );
 
     if (result.rows.length > 0) {
-      console.log(
-        `Category with ID ${id} and related associations deleted successfully.`
-      );
       await client.query("COMMIT");
-      return true; // Return true if the category was deleted
+
+      redirect("/dashboard/categories?deleted=true");
     } else {
       console.log(`Category with ID ${id} not found.`);
       await client.query("ROLLBACK");
-      return false; // Return false if no category with the given ID was found
+      return false;
     }
   } catch (error) {
     console.error("Error deleting category by ID:", error);
@@ -803,7 +798,7 @@ export async function fetchFilteredTransactions(
       LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
 
     // Add pagination params to queryParams array
-    queryParams.push(ITEMS_PER_PAGE, offset);
+    queryParams.push(`${ITEMS_PER_PAGE}`, `${offset}`);
 
     // Execute the query
     const result = await pool.query(queryString, queryParams);
@@ -901,7 +896,17 @@ export async function fetchFilteredBookings(
       LEFT JOIN "Car" c ON b."carId" = c.id
       WHERE 
         (b.viewed = $1 OR $1 = '') AND
-        (u.name ILIKE $2 OR c.name ILIKE $2)`;
+        (u.name ILIKE $2 OR 
+        c.name ILIKE $2 OR
+        u.phone ILIKE $2 OR
+        u.email ILIKE $2 OR
+        c.name ILIKE $2 OR
+        CAST(b.amount AS TEXT) ILIKE $2 OR 
+        b.departure ILIKE $2 OR 
+        b.destination ILIKE $2 OR 
+        b."paymentStatus" ILIKE $2 OR
+        b."bookingStatus" ILIKE $2
+        )`;
 
     // Array to store query parameters
     const queryParams = [notification, `%${query}%`];
@@ -924,7 +929,7 @@ export async function fetchFilteredBookings(
       LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
 
     // Add pagination params to queryParams
-    queryParams.push(ITEMS_PER_PAGE, offset);
+    queryParams.push(`${ITEMS_PER_PAGE}`, `${offset}`);
 
     // Execute the query
     const result = await pool.query(queryString, queryParams);
@@ -943,8 +948,21 @@ export async function fetchBookingsPages(query: string) {
     const count = await pool.query(
       `
       SELECT COUNT(*)
-      FROM "Booking"
-   `
+      FROM "Booking" b
+      LEFT JOIN "User" u ON b."userId" = u.id
+      LEFT JOIN "Car" c ON b."carId" = c.id
+      WHERE 
+        u.name ILIKE $1 OR 
+        c.name ILIKE $1 OR
+        u.phone ILIKE $1 OR
+        u.email ILIKE $1 OR
+        CAST(b.amount AS TEXT) ILIKE $1 OR 
+        b.departure ILIKE $1 OR 
+        b.destination ILIKE $1 OR 
+        b."paymentStatus" ILIKE $1 OR
+        b."bookingStatus" ILIKE $1
+        `,
+      [`%${query}%`]
     );
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
@@ -964,8 +982,9 @@ export async function getBookingById(
       SELECT 
         b.*,  -- Select all columns from Booking table
         u.name AS "userName",
-        u.email,
-        u.phone,
+        u.email AS "userEmail",
+        u.phone AS "userPhone",
+        u.image AS "userImage",
         c.id AS "carId",
         c.name AS "carName",
         ARRAY_AGG(
@@ -981,7 +1000,7 @@ export async function getBookingById(
       LEFT JOIN "BookingAddon" ba ON b.id = ba."bookingId"
       LEFT JOIN "Addon" a ON ba."addonId" = a.id
       WHERE b.id = $1
-      GROUP BY b.id, u.name, u.email, u.phone, c.id, c.name
+      GROUP BY b.id, u.name, u.email, u.image, u.phone, c.id, c.name
       `,
       [bookingId]
     );
@@ -1036,7 +1055,7 @@ const BookingFormSchema = z.object({
 });
 
 export async function updateBooking(
-  id: number,
+  id: string,
   prevState: BookingActionState,
   formData: FormData
 ): Promise<BookingActionState> {
@@ -1078,8 +1097,8 @@ export async function updateBooking(
 
   try {
     // Prepare the update query and values array
-    let updateFields = [];
-    let values = [id]; // Start the values array with the ID for where clause
+    const updateFields = [];
+    const values = [id]; // Start the values array with the ID for where clause
 
     // Conditionally add the fields to be updated based on the available data
     if (paymentStatus) {
@@ -1115,7 +1134,7 @@ export async function updateBooking(
     const setClause = updateFields.join(", ");
 
     // Update Booking details
-    const result = await pool.query(
+    await pool.query(
       `
       UPDATE "Booking"
       SET ${setClause}
@@ -1125,14 +1144,18 @@ export async function updateBooking(
       values
     );
 
-    revalidatePath(`/dashboard/bookings/${id}/display`);
-    return { message: "Booking updated successfully" };
+    if (updateFields.length === 1) {
+      revalidatePath(`/dashboard/notifications`);
+      return { message: "" };
+    } else {
+      revalidatePath(`/dashboard/bookings/${id}/display`);
+      redirect(`/dashboard/bookings/${id}/display?success=true`);
+    }
   } catch (error) {
     // Rollback the transaction in case of error
-    console.error("Error updating :", error);
-    return { state_error: "Error updating " };
+    console.error("Error updating booking state :", error);
+    return { state_error: "Error updating state" };
   }
-  redirect("/dashboard/cars?success=true");
 }
 
 export async function fetchCardData(startDate: string, endDate: string) {

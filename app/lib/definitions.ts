@@ -14,7 +14,7 @@ export type CarState = {
   price: number;
   image: string;
   description: string;
-  addons: { addonId: string; addonName: string }[];
+  addons: { addonId: string; addonName: string; addonValue: number }[];
   features: { featureName: string; featureValue: string }[];
 };
 
@@ -34,11 +34,11 @@ export type CarActionState = {
 };
 
 export type CategoryState = {
-  id: string;
-  name: string;
+  categoryId: string;
+  categoryName: string;
   brands: Brand[];
   price: number;
-  image: string;
+  imageUrl: string;
   description: string;
 };
 
@@ -64,23 +64,23 @@ export type BookingActionState = {
     userId?: string[];
     userName?: string[];
     phone?: string[];
-    carId?: number[];
+    carId?: string[];
     carName?: string[];
-    bookingDate?: Date[];
-    amount?: number[];
+    bookingDate?: string[];
+    amount?: string[];
     departure?: string[];
     destination?: string[];
     paymentStatus?: string[];
     bookType?: string[];
     paymentType?: string[];
-    bookingStatus?: string;
-    createdAt?: Date[];
+    bookingStatus?: string[];
+    createdAt?: string[];
     departureLatitude?: string[];
     departureLongitude?: string[];
     destinationLatitude?: string[];
     destinationLongitude?: string[];
     viewed?: string[];
-    addons?: Addon[];
+    addons?: string[];
   };
   state_error?: string | null;
   message?: string | null;
@@ -90,7 +90,9 @@ export type BookingState = {
   id: string;
   userId: string;
   userName: string;
-  phone: string;
+  userImage: string;
+  userEmail: string;
+  userPhone: string;
   carId: number;
   carName: string;
   bookingDate: Date;
@@ -121,7 +123,7 @@ export type TransactionState = {
   reference: string;
   destination: string;
   status: string;
-  bookId: string;
+  bookingId: string;
   createdAt: string;
 };
 
@@ -133,5 +135,5 @@ export type BookingData = {
   imageUrl: string;
   categoryId: number;
   categoryName: string;
-  amount: number;
+  amount: string;
 };
