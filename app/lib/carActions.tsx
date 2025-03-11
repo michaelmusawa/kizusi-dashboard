@@ -40,7 +40,11 @@ export async function getCarById(id: string) {
   }
 }
 
-export async function fetchFilteredCars(filter, query, limit) {
+export async function fetchFilteredCars(
+  filter: string,
+  query: string,
+  limit: number
+) {
   try {
     const result = await pool.query(
       `

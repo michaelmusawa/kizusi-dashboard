@@ -116,7 +116,13 @@ const NotificationTable = ({ bookings }: { bookings: BookingState[] }) => {
                   {formatCurrency(booking.amount)}
                 </td>
                 <td className="border px-4 py-2">
-                  {toSentenceCase(booking.paymentStatus)}
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${getStatusClass(
+                      booking.paymentStatus
+                    )}`}
+                  >
+                    {toSentenceCase(booking.paymentStatus)}
+                  </span>
                 </td>
                 <td className="border px-4 py-2">
                   {booking.paymentType === "full" ? "Full amount" : "Reserved"}

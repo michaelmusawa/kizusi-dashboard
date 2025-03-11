@@ -4,8 +4,21 @@ export async function getBookingById(id: string) {
   try {
     const result = await pool.query(
       `
-      SELECT * FROM "Booking" WHERE id = $1
-    `,
+      SELECT 
+        b.*,
+        ARRAY_AGG(
+          JSON_BUILD_OBJECT(
+            'addonId', a.id,
+            'addonName', a."addonName",
+            'addonValue', a."addonValue"
+          )
+        ) AS "addons" -- Aggregate addons into an array of JSON objects
+      FROM "Booking" b
+      LEFT JOIN "BookingAddon" ba ON b.id = ba."bookingId"
+      LEFT JOIN "Addon" a ON ba."addonId" = a.id
+      WHERE b.id = $1
+      GROUP BY b.id
+      `,
       [id]
     );
 
@@ -17,8 +30,6 @@ export async function getBookingById(id: string) {
 }
 
 export async function fetchFilteredBookings(filter: string, query: string) {
-  console.log("filter", filter);
-  console.log("query", query);
   try {
     const result = await pool.query(
       `

@@ -1,6 +1,6 @@
 import { lusitana } from "@/app/fonts/fonts";
 import { generateYAxis, groupBookingsByCategory } from "@/app/lib/utils";
-import { fetchLatestBookings } from "@/app/lib/action";
+import { fetchDashboardBookings, fetchLatestBookings } from "@/app/lib/action";
 import Calendar from "../icons/Calender";
 
 export default async function RevenueChart({
@@ -10,7 +10,7 @@ export default async function RevenueChart({
   startDate: string;
   endDate: string;
 }) {
-  const bookings = await fetchLatestBookings(startDate, endDate);
+  const bookings = await fetchDashboardBookings(startDate, endDate);
   const chartHeight = 350;
 
   const { yAxisLabels, topLabel } = generateYAxis(bookings);

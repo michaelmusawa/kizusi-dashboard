@@ -199,7 +199,8 @@ const BookingDetails = ({
 
       {actionButtons && (
         <div className="flex flex-wrap gap-4 mt-8">
-          {booking?.bookingStatus === "PENDING" ? (
+          {booking?.bookingStatus === "PENDING" &&
+          booking.paymentStatus === "CONFIRMED" ? (
             <>
               <button
                 onClick={() => handleOnClick("bookingStatus", "PROCEEDED")}
@@ -226,12 +227,20 @@ const BookingDetails = ({
           )}
 
           {booking?.paymentStatus === "PENDING" && (
-            <button
-              onClick={() => handleOnClick("paymentStatus", "CONFIRMED")}
-              className="text-xs md:text-lg px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-            >
-              Mark as Paid
-            </button>
+            <>
+              <button
+                onClick={() => handleOnClick("paymentStatus", "CONFIRMED")}
+                className="text-xs md:text-lg px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+              >
+                Mark as Paid
+              </button>
+              <button
+                onClick={() => handleOnClick("deleteStatus", "DELETED")}
+                className="text-xs md:text-lg px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-700 transition"
+              >
+                Delete booking
+              </button>
+            </>
           )}
         </div>
       )}

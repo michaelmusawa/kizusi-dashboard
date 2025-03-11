@@ -1,9 +1,10 @@
 import axios from "axios";
 import pool from "./db";
 import { NextResponse } from "next/server";
+import { BookingState } from "./definitions";
 
-let token;
-let booking;
+let token: string;
+let booking: BookingState;
 
 export const initiatePayment = async (body: any) => {
   const {

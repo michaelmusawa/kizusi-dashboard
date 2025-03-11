@@ -84,13 +84,11 @@ export async function POST(
         console.log("Refund response:", refundResponse.data);
         refundResponses.push(refundResponse.data);
       } catch (error) {
-        console.error(
-          "Refund request failed:",
-          error.response?.data || error.message
-        );
+        console.error("Refund request failed:", error);
         refundResponses.push({
           status: "500",
-          message: error.response?.data?.message || "Refund request failed",
+          message: "Refund request failed",
+          error,
         });
       }
     }

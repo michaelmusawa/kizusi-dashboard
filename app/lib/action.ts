@@ -1037,6 +1037,7 @@ const BookingFormSchema = z.object({
   bookType: z.string().nullable().optional(),
   paymentType: z.string().nullable().optional(),
   bookingStatus: z.string().nullable().optional(),
+  deleteStatus: z.string().nullable().optional(),
   createdAt: z.string().nullable().optional(),
   departureLatitude: z.string().nullable().optional(),
   departureLongitude: z.string().nullable().optional(),
@@ -1073,6 +1074,7 @@ export async function updateBooking(
     bookType: formData.get("bookType"),
     paymentType: formData.get("paymentType"),
     bookingStatus: formData.get("bookingStatus"),
+    deleteStatus: formData.get("deleteStatus"),
     createdAt: formData.get("createdAt"),
     departureLatitude: formData.get("departureLatitude"),
     departureLongitude: formData.get("departureLongitude"),
@@ -1092,8 +1094,14 @@ export async function updateBooking(
     };
   }
 
-  const { paymentStatus, bookType, paymentType, bookingStatus, viewed } =
-    validatedFields.data;
+  const {
+    paymentStatus,
+    bookType,
+    paymentType,
+    bookingStatus,
+    viewed,
+    deleteStatus,
+  } = validatedFields.data;
 
   try {
     // Prepare the update query and values array
@@ -1120,6 +1128,11 @@ export async function updateBooking(
       updateFields.push(`"bookingStatus" = $${updateFields.length + 2}`);
       values.push(bookingStatus);
     }
+
+    if (deleteStatus) {
+      updateFields.push(`"deleteStatus" = $${updateFields.length + 2}`);
+      values.push(deleteStatus);
+    }
     if (viewed) {
       updateFields.push(`"viewed" = $${updateFields.length + 2}`);
       values.push(viewed);
@@ -1133,16 +1146,30 @@ export async function updateBooking(
     // Create the SET clause by joining the updated fields
     const setClause = updateFields.join(", ");
 
-    // Update Booking details
-    await pool.query(
-      `
+    if (!id || typeof id !== "string") {
+      return { state_error: "Invalid booking ID" };
+    }
+
+    if (deleteStatus) {
+      await pool.query(
+        `
+        DELETE FROM "Booking"  WHERE id = $1`,
+        [id]
+      );
+
+      redirect(`/dashboard/bookings?deleted=true`);
+    } else {
+      // Update Booking details
+      await pool.query(
+        `
       UPDATE "Booking"
       SET ${setClause}
       WHERE id = $1
       RETURNING id
     `,
-      values
-    );
+        values
+      );
+    }
 
     if (updateFields.length === 1) {
       revalidatePath(`/dashboard/notifications`);
@@ -1152,6 +1179,10 @@ export async function updateBooking(
       redirect(`/dashboard/bookings/${id}/display?success=true`);
     }
   } catch (error) {
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+      // Re-throw redirect errors for Next.js to handle
+      throw error;
+    }
     // Rollback the transaction in case of error
     console.error("Error updating booking state :", error);
     return { state_error: "Error updating state" };
@@ -1185,7 +1216,7 @@ export async function fetchCardData(startDate: string, endDate: string) {
     let reservedQuery = `
       SELECT COUNT(*) 
       FROM "Booking"
-      WHERE "bookType" = $1
+      WHERE "paymentType" = $1 AND "paymentStatus" = 'CONFIRMED'
     `;
     const reservedQueryParams: string[] = ["reserve"];
     if (startDate && endDate) {
@@ -1206,8 +1237,8 @@ export async function fetchCardData(startDate: string, endDate: string) {
     // Query for summing transactions for bookings
     let transactionsStatusQuery = `
       SELECT
-        SUM(CASE WHEN "paymentType" = 'reserve' THEN amount ELSE 0 END) AS "paid",
-        SUM(CASE WHEN "paymentType" = 'full' THEN amount ELSE 0 END) AS "reserved"
+        SUM(CASE WHEN ("paymentType" = 'reserve' AND "paymentStatus" = 'CONFIRMED') THEN amount ELSE 0 END) AS "paid",
+        SUM(CASE WHEN ("paymentType" = 'full' AND "paymentStatus" = 'CONFIRMED') THEN amount ELSE 0 END) AS "reserved"
       FROM "Booking"
       WHERE 1=1
     `;
@@ -1261,6 +1292,65 @@ export async function fetchLatestBookings(
 ): Promise<BookingData[]> {
   try {
     let queryString = `
+  SELECT 
+    b.id,
+    u.name AS "userName",
+    u.email,
+    u.phone,
+    c.name AS "carName",
+    c."imageUrl",
+    c."categoryId",
+    cat.name AS "categoryName",
+    b.amount 
+  FROM "Booking" b
+  LEFT JOIN "User" u ON b."userId" = u.id
+  LEFT JOIN "Car" c ON b."carId" = c.id
+  LEFT JOIN "Category" cat ON c."categoryId" = cat.id
+`;
+
+    const queryParams: string[] = [];
+
+    // Add date filtering if startDate and endDate are provided
+    let whereConditions: string[] = [];
+
+    if (startDate && endDate) {
+      whereConditions.push(`b."createdAt" BETWEEN $1 AND $2`);
+      queryParams.push(startDate, endDate);
+    } else if (startDate) {
+      whereConditions.push(`b."createdAt" >= $1`);
+      queryParams.push(startDate);
+    } else if (endDate) {
+      whereConditions.push(`b."createdAt" <= $1`);
+      queryParams.push(endDate);
+    }
+
+    // Add paymentStatus filter
+    whereConditions.push(`b."paymentStatus" = 'CONFIRMED'`);
+
+    // If there are any where conditions, add them to the query
+    if (whereConditions.length > 0) {
+      queryString += ` WHERE ` + whereConditions.join(" AND ");
+    }
+
+    // Limit the results to the latest 5 bookings
+    queryString += ` ORDER BY b."createdAt" DESC LIMIT 7`;
+
+    // Execute the query with the constructed queryString and queryParams
+    const result = await pool.query(queryString, queryParams);
+
+    return result.rows;
+  } catch (error) {
+    console.error("Error fetching latest bookings:", error);
+    throw new Error("Failed to fetch bookings.");
+  }
+}
+
+export async function fetchDashboardBookings(
+  startDate: string,
+  endDate: string
+): Promise<BookingData[]> {
+  try {
+    let queryString = `
       SELECT 
         b.id,
         u.name AS "userName",
@@ -1292,7 +1382,7 @@ export async function fetchLatestBookings(
     }
 
     // Limit the results to the latest 5 bookings
-    queryString += ` ORDER BY b."createdAt" DESC LIMIT 5`;
+    queryString += ` ORDER BY b."createdAt" DESC`;
 
     // Execute the query with the constructed queryString and queryParams
     const result = await pool.query(queryString, queryParams);

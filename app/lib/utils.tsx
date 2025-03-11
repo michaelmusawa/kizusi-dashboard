@@ -75,10 +75,23 @@ export const generateYAxis = (bookings: BookingData[]) => {
   ); // Access categoryTotal from each item
   const topLabel = Math.ceil(highestRecord / 1000) * 1000;
 
+  const topValue = (topLabel * 1000) / 1000;
+
+  const numberOfLabels = 10;
+  const step = topValue / (numberOfLabels - 1);
+
   // Step 3: Create Y-axis labels
   const yAxisLabels = [];
-  for (let i = topLabel; i >= 0; i -= 1000) {
-    yAxisLabels.push(`$${i / 1000}K`);
+  for (let i = 0; i < numberOfLabels; i++) {
+    const currentValue = topValue - step * i;
+    // Format as "$X.XK" (1 decimal place for precision)
+    yAxisLabels.push(
+      `$${
+        (currentValue / 1000) % 1 === 0
+          ? (currentValue / 1000).toFixed(0)
+          : (currentValue / 1000).toFixed(1)
+      }K`
+    );
   }
 
   // Return the Y-axis labels and the top label for scaling
