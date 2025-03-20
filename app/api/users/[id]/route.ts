@@ -16,6 +16,7 @@ export async function GET(
   try {
     const user = await getUserById(id);
     if (!user) {
+      console.log("im here");
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
     return NextResponse.json(user);

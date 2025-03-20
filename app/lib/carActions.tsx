@@ -11,7 +11,7 @@ export async function getCarById(id: string) {
         car."imageUrl" AS image,
         car.description,
         JSONB_BUILD_OBJECT('brandId', b.id, 'brandName', b.name) AS brand,
-        JSONB_BUILD_OBJECT('id', c.id, 'name', c.name) AS category,
+        JSONB_BUILD_OBJECT('categoryId', c.id, 'categoryName', c.name) AS category,
         COALESCE(
           JSONB_AGG(
             DISTINCT JSONB_BUILD_OBJECT('featureId', f.id, 'featureName', f."featureName", 'featureValue', f."featureValue")
@@ -43,7 +43,7 @@ export async function getCarById(id: string) {
 export async function fetchFilteredCars(
   filter: string,
   query: string,
-  limit: number
+  limit: string
 ) {
   try {
     const result = await pool.query(

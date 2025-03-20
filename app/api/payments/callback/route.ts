@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+
+    console.log("the body", body);
     const callbackResponse = await handlePaymentCallback(body);
     return NextResponse.json(callbackResponse);
   } catch (error) {

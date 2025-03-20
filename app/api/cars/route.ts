@@ -8,7 +8,6 @@ export async function GET(request: NextRequest) {
   const query = searchParams.get("query") || "";
   const limit = searchParams.get("limit") || "";
 
-  console.log("the request for cars", filter, query, limit);
   try {
     const cars = await fetchFilteredCars(filter, query, limit);
     return NextResponse.json(cars);

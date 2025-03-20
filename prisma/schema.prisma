@@ -27,6 +27,7 @@ model Booking {
   carId         Int
   car           Car           @relation(fields: [carId], references: [id], onDelete: Cascade)
   bookingDate     DateTime
+  bookingEndDate     DateTime?
   amount      Decimal  @db.Decimal(10, 2)
   departureLatitude Decimal @db.Decimal(10,2)
   departureLongitude Decimal @db.Decimal(10,2)

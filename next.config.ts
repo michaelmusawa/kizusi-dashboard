@@ -17,6 +17,13 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "cdn.3dmodels.org",
+        port: "",
+        pathname: "**", // Use "**" to allow all image paths under the hostname
+      },
+
+      {
+        protocol: "https",
         hostname: "img.clerk.com",
         port: "",
         pathname: "**", // Use "**" to allow all image paths under the hostname
