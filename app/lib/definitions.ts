@@ -96,6 +96,7 @@ export type BookingState = {
   carId: number;
   carName: string;
   bookingDate: Date;
+  bookingEndDate: Date;
   amount: number;
   departure: string;
   destination: string;

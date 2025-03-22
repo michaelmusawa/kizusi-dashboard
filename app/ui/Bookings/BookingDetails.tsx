@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { updateBooking } from "@/app/lib/action";
 import Link from "next/link";
 import {
+  calculateDaysBetween,
   formatCurrency,
   formatDateToLocal,
   formatTimeToLocal,
@@ -92,6 +93,16 @@ const BookingDetails = ({
     );
   }
 
+  let numberOfDays = 0;
+  if (booking?.bookingDate && booking.bookingEndDate) {
+    numberOfDays = calculateDaysBetween(
+      booking?.bookingDate,
+      booking.bookingEndDate
+    );
+  } else if (booking?.bookingDate) {
+    numberOfDays = 1;
+  }
+
   return (
     <div className="container mx-auto p-4">
       {actionButtons && (
@@ -130,6 +141,23 @@ const BookingDetails = ({
                 " " +
                 formatTimeToLocal(booking.bookingDate.toString())}
           </p>
+          {booking?.bookType === "full_day" && (
+            <>
+              <p className="text-xs md:text-lg">
+                <span className="font-semibold text-gray-700">To:</span>{" "}
+                {booking?.bookingEndDate &&
+                  formatDateToLocal(booking.bookingEndDate.toString()) +
+                    " " +
+                    formatTimeToLocal(booking.bookingEndDate.toString())}
+              </p>
+              <p className="text-xs md:text-lg">
+                <span className="font-semibold text-gray-700">
+                  No. of days:{" "}
+                </span>{" "}
+                {`${numberOfDays} ${numberOfDays === 1 ? "day" : "days"}`}
+              </p>
+            </>
+          )}
           {booking?.bookType === "transfer" && (
             <p className="text-lg">
               <span className="font-semibold text-gray-700">Destination:</span>{" "}
