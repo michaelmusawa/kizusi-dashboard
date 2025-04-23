@@ -143,7 +143,7 @@ export const initiatePayment = async (body: any) => {
         amount: amount ?? booking.amount,
         description: description,
         callback_url: callbackUrl,
-        notification_id: "b8d2ca29-f359-4abc-9aa1-dc043dd14640",
+        notification_id: "c0c7cc62-cc4a-4e8c-8de2-dbe4be94cf98",
         billing_address: {
           email_address: email,
           phone_number: phoneNumber,
