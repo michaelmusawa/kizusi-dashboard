@@ -1,6 +1,5 @@
 import axios from "axios";
 import pool from "./db";
-import { NextResponse } from "next/server";
 import { BookingState } from "./definitions";
 
 let booking: BookingState;
@@ -64,25 +63,25 @@ export const initiatePayment = async (body: any) => {
 
         // ✅ Create booking in database BEFORE sending payment request
         const bookingQuery = `
-      INSERT INTO "Booking" (
-        id,
-       "userId", 
-       "carId", 
-       "bookingDate", 
-       "bookingEndDate",
-       amount, 
-       "departure", 
-       "destination", 
-       "paymentStatus", 
-       "bookType", 
-       "paymentType", 
-       "departureLatitude",
-      "departureLongitude",
-      "destinationLatitude", 
-      "destinationLongitude")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'PENDING', $9, $10, $11, $12, $13, $14)
-      RETURNING id;
-    `;
+          INSERT INTO "Booking" (
+            id,
+          "userId", 
+          "carId", 
+          "bookingDate", 
+          "bookingEndDate",
+          amount, 
+          "departure", 
+          "destination", 
+          "paymentStatus", 
+          "bookType", 
+          "paymentType", 
+          "departureLatitude",
+          "departureLongitude",
+          "destinationLatitude", 
+          "destinationLongitude")
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'PENDING', $9, $10, $11, $12, $13, $14)
+          RETURNING id;
+        `;
 
         const bookingResult = await pool.query(bookingQuery, [
           reference,
@@ -122,9 +121,11 @@ export const initiatePayment = async (body: any) => {
           // Insert addons into BookingAddon table
           if (addonIds.length > 0) {
             const addonQuery = `
-        INSERT INTO "BookingAddon" ("bookingId", "addonId")
-        VALUES ${addonIds.map((_, index) => `($1, $${index + 2})`).join(", ")}
-      `;
+            INSERT INTO "BookingAddon" ("bookingId", "addonId")
+            VALUES ${addonIds
+              .map((_, index) => `($1, $${index + 2})`)
+              .join(", ")}
+          `;
 
             await pool.query(addonQuery, [bookingId, ...addonIds]);
           }

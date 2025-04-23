@@ -42,6 +42,7 @@ model Booking {
   transaction   Transaction[]
   transactionId String?       @unique // Links to Transaction if paid
   addons        BookingAddon[]
+  pesapalMappings    PesapalMapping[] 
   createdAt     DateTime      @default(now())
   updatedAt     DateTime?      @updatedAt
   viewed        String         @default("false")
@@ -134,4 +135,14 @@ model Addon {
 
   @@unique([carId, addonName]) // Prevents duplicate addons for a car
 }
+
+model PesapalMapping {
+  merchant_reference String  @id @map("merchant_reference")
+  order_tracking_id   String? @map("order_tracking_id")
+  booking_id          String   @map("booking_id")
+  booking             Booking  @relation(fields: [booking_id], references: [id])
+
+  @@map("PesapalMapping")
+}
+
 

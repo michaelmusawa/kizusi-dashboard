@@ -1,13 +1,13 @@
 // app/api/payments/route.ts
-import { initiatePayment } from "@/app/lib/paymentActions";
+import { initiateBookingFlow } from "@/app/lib/payment/services/booking";
+// import { initiatePayment } from "@/app/lib/paymentActions";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const paymentResponse = await initiatePayment(body);
+    const paymentResponse = await initiateBookingFlow(body);
 
-    console.log("Dem", paymentResponse);
     return NextResponse.json(paymentResponse);
   } catch (error) {
     console.log(error);
