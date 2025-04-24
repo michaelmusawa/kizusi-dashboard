@@ -41,6 +41,7 @@ export async function initiateBookingFlow(body: any) {
 
   // 2. Create booking & addons if new
   await createBookingIfNotExists({
+    reference,
     bookingId,
     userId,
     carId,
@@ -65,7 +66,7 @@ export async function initiateBookingFlow(body: any) {
     amount,
     description,
     callback_url: callbackUrl,
-    notification_id: "c0c7cc62-cc4a-4e8c-8de2-dbe4be94cf98",
+    notification_id: "d41a4afa-0e37-4438-99ff-dbe3c06b6468",
     billing_address: {
       email_address: email,
       phone_number: phoneNumber,
@@ -76,11 +77,13 @@ export async function initiateBookingFlow(body: any) {
   };
   const resp = await submitOrder(paymentRequest);
 
+  const useBookingId = bookingId || reference;
+
   await pool.query(
     `INSERT INTO "PesapalMapping" 
        (merchant_reference, order_tracking_id, booking_id)
      VALUES ($1,$2,$3)`,
-    [resp.merchant_reference, resp.order_tracking_id, bookingId]
+    [resp.merchant_reference, resp.order_tracking_id, useBookingId]
   );
 
   return {
@@ -93,6 +96,7 @@ export async function initiateBookingFlow(body: any) {
 }
 
 async function createBookingIfNotExists(opts: {
+  reference: string;
   bookingId: string;
   userId: string;
   carId: string;
@@ -123,7 +127,7 @@ async function createBookingIfNotExists(opts: {
         "departureLatitude","departureLongitude","destinationLatitude","destinationLongitude")
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,'PENDING',$9,$10,$11,$12,$13,$14)`,
       [
-        opts.bookingId,
+        opts.reference,
         opts.userId,
         opts.carId,
         opts.bookingDate,
