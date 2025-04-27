@@ -6,6 +6,7 @@ import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";
 import Link from "next/link";
 import { Suspense } from "react";
+import AI from "@/app/ui/AI";
 
 const Page = async (props: {
   searchParams?: Promise<{
@@ -49,6 +50,7 @@ const Page = async (props: {
       <div className="absolute bottom-8 flex w-full justify-center">
         <Pagination totalPages={totalPages} />
       </div>
+      <AI />
     </main>
   );
 };

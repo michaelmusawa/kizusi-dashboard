@@ -9,9 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^1.1.14",
+    "@ai-sdk/openai": "^1.2.5",
+    "@ai-sdk/react": "^1.1.23",
     "@auth/prisma-adapter": "^2.7.4",
+    "@huggingface/transformers": "^3.5.0",
     "@prisma/client": "6.2.1",
+    "@xenova/transformers": "^2.17.2",
+    "ai": "^4.1.61",
     "axios": "^1.8.2",
+    "chromadb-default-embed": "^2.14.0",
     "clsx": "^2.1.1",
     "next": "15.1.7",
     "next-auth": "5.0.0-beta.25",
@@ -19,6 +26,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.1",
+    "sharp": "^0.33.5",
     "use-debounce": "^10.0.4",
     "zod": "^3.24.1"
   },
@@ -37,5 +45,16 @@
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "bcrypt",
+      "esbuild",
+      "prisma",
+      "protobufjs",
+      "sharp"
+    ]
   }
 }
