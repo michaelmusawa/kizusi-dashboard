@@ -66,7 +66,7 @@ export async function initiateBookingFlow(body: any) {
     amount,
     description,
     callback_url: callbackUrl,
-    notification_id: "739dee48-de63-4c20-9c2f-dbe0f60b3b8d",
+    notification_id: "bf1686ac-b09d-406a-a375-dbdf0b431464",
     billing_address: {
       email_address: email,
       phone_number: phoneNumber,
