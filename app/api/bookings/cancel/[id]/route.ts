@@ -5,14 +5,9 @@ import axios from "axios";
 
 export async function POST(
   request: NextRequest,
-  props: {
-    params?: Promise<{
-      id?: string;
-    }>;
-  }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const params = await props.params;
-  const id = params?.id || "";
+  const { id } = await params;
 
   try {
     const { amount, first_name, last_name, remarks } = await request.json();

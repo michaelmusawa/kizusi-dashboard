@@ -1,6 +1,6 @@
 import { lusitana } from "@/app/fonts/fonts";
 import { generateYAxis, groupBookingsByCategory } from "@/app/lib/utils";
-import { fetchDashboardBookings, fetchLatestBookings } from "@/app/lib/action";
+import { fetchDashboardBookings } from "@/app/lib/action";
 import Calendar from "../icons/Calender";
 
 export default async function RevenueChart({

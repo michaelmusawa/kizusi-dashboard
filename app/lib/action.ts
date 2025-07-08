@@ -1311,7 +1311,7 @@ export async function fetchLatestBookings(
     const queryParams: string[] = [];
 
     // Add date filtering if startDate and endDate are provided
-    let whereConditions: string[] = [];
+    const whereConditions: string[] = [];
 
     if (startDate && endDate) {
       whereConditions.push(`b."createdAt" BETWEEN $1 AND $2`);

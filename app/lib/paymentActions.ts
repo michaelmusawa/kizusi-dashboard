@@ -4,7 +4,33 @@ import { BookingState } from "./definitions";
 
 let booking: BookingState;
 
-export const initiatePayment = async (body: any) => {
+interface PaymentBody {
+  bookingId: string;
+  amount: number;
+  email: string;
+  phoneNumber: string;
+  reference: string;
+  description: string;
+  callbackUrl: string;
+  userId: string;
+  carId: string;
+  bookingDate: string;
+  bookingEndDate: string;
+  departureLatitude: number;
+  departureLongitude: number;
+  destinationLatitude: number;
+  destinationLongitude: number;
+  departure: string;
+  destination: string;
+  bookType: string;
+  paymentType: string;
+  addons?: string[];
+  image: string;
+  first_name: string;
+  last_name: string;
+}
+
+export const initiatePayment = async (body: PaymentBody) => {
   const {
     bookingId,
     amount,
@@ -187,7 +213,12 @@ export const initiatePayment = async (body: any) => {
   }
 };
 
-export const handlePaymentCallback = async (body: any) => {
+interface PaymentCallbackBody {
+  OrderTrackingId: string;
+  OrderMerchantReference: string;
+}
+
+export const handlePaymentCallback = async (body: PaymentCallbackBody) => {
   const { OrderTrackingId, OrderMerchantReference } = body;
 
   console.log("toke:", `${await getToken()}`);

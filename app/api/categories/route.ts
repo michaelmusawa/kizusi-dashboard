@@ -1,8 +1,8 @@
 // app/api/categories/route.ts
 import { fetchFilteredCategories } from "@/app/lib/categoryActions";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const categories = await fetchFilteredCategories();
     return NextResponse.json({ categories });

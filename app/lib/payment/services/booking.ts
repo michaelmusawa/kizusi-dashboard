@@ -3,7 +3,33 @@ import pool from "../../db";
 import { submitOrder } from "../pesapal-client";
 import { ensureUserExists } from "./user";
 
-export async function initiateBookingFlow(body: any) {
+interface BookingFlowBody {
+  bookingId: string;
+  userId: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phoneNumber: string;
+  image: string;
+  carId: string;
+  bookingDate: string;
+  bookingEndDate: string;
+  departure: string;
+  destination: string;
+  bookType: string;
+  paymentType: string;
+  amount: number;
+  reference: string;
+  description: string;
+  callbackUrl: string;
+  departureLatitude: number;
+  departureLongitude: number;
+  destinationLatitude: number;
+  destinationLongitude: number;
+  addons?: string[];
+}
+
+export async function initiateBookingFlow(body: BookingFlowBody) {
   const {
     bookingId,
     userId,

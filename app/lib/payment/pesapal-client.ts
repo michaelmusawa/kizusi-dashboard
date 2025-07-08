@@ -1,8 +1,24 @@
 import axios from "axios";
 
+export interface PaymentRequest {
+  id: string;
+  currency: string;
+  amount: number;
+  description: string;
+  callback_url: string;
+  notification_id: string;
+  billing_address: {
+    email_address: string;
+    phone_number: string;
+    country_code: string;
+    first_name: string;
+    last_name: string;
+  };
+}
+
 const BASE = "https://cybqa.pesapal.com/pesapalv3/api/Transactions";
 
-export async function submitOrder(payload: any) {
+export async function submitOrder(payload: PaymentRequest) {
   const token = await getToken();
   const res = await axios.post(`${BASE}/SubmitOrderRequest`, payload, {
     headers: {

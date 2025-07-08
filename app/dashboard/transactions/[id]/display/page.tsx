@@ -1,9 +1,8 @@
 import { getTransactionsById } from "@/app/lib/action";
 
-type Params = { id: string };
-
-const Page = async ({ params }: { params: Params }) => {
-  const { id } = await params;
+const Page = async (props: { params?: Promise<{ id?: string }> }) => {
+  const params = await props.params;
+  const id = params?.id || "";
 
   const transactions = await getTransactionsById(id);
 

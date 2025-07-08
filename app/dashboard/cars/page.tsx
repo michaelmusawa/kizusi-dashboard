@@ -6,7 +6,6 @@ import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";
 import Link from "next/link";
 import { Suspense } from "react";
-import AI from "@/app/ui/AI";
 
 const Page = async (props: {
   searchParams?: Promise<{

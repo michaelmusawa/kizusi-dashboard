@@ -8,14 +8,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  props: {
-    params?: Promise<{
-      id?: string;
-    }>;
-  }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const params = await props.params;
-  const id = params?.id || "";
+  const { id } = await params;
 
   try {
     const user = await getUserById(id);
@@ -35,14 +30,9 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  props: {
-    params?: Promise<{
-      id?: string;
-    }>;
-  }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const params = await props.params;
-  const id = params?.id || "";
+  const { id } = await params;
 
   try {
     const body = await request.json();
@@ -61,9 +51,9 @@ export async function POST(
 // ← New DELETE handler
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id?: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const id = params.id || "";
+  const { id } = await params;
   try {
     // first check user exists (optional)
     const user = await getUserById(id);

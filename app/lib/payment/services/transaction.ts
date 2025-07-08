@@ -3,7 +3,12 @@
 import pool from "../../db";
 import { getTransactionStatus } from "../pesapal-client";
 
-export async function handleCallbackFlow(body: any) {
+interface CallbackBody {
+  OrderTrackingId: string;
+  OrderMerchantReference: string;
+}
+
+export async function handleCallbackFlow(body: CallbackBody) {
   const { OrderTrackingId, OrderMerchantReference } = body;
 
   const statusData = await getTransactionStatus(OrderTrackingId);
