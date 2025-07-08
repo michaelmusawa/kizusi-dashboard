@@ -45,3 +45,7 @@ export async function updateUserById(
   );
   return result.rows[0];
 }
+
+export async function deleteUserById(id: string): Promise<void> {
+  await pool.query(`DELETE FROM "User" WHERE id = $1`, [id]);
+}

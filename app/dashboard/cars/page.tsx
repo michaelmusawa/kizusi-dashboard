@@ -50,7 +50,6 @@ const Page = async (props: {
       <div className="absolute bottom-8 flex w-full justify-center">
         <Pagination totalPages={totalPages} />
       </div>
-      <AI />
     </main>
   );
 };
