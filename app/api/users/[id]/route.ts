@@ -46,6 +46,7 @@ export async function POST(
 
   try {
     const body = await request.json();
+    console.log("body", body);
     const updatedUser = await updateUserById(id, body);
     return NextResponse.json(updatedUser);
   } catch (error) {
